@@ -310,4 +310,29 @@ public:
 //	}
 //};
 
+template< class ClockSampleAlarm, typename TimeT = uint32_t >
+class Clock
+{
+public:
+	typedef TimeT Time;
+
+	Clock ()
+		: time (0),
+		  alarm ( InterruptHandler::from_method<Clock, &Clock::incTime>(this) )
+	{}
+	const Time& getTime () const
+	{
+		return time;
+	}
+
+private:
+	ClockSampleAlarm alarm;
+	Time time;
+
+	void incTime ()
+	{
+		time ++;
+	}
+};
+
 #endif /* TIMERS_H_ */
