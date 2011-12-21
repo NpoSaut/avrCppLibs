@@ -38,8 +38,8 @@
  *        Например младшие 2 байта времени 0xDCBA, мы ставим задачу через 20000 и получаем время 0x2ADA - раньше текущего.
  *
  *  ~~~ Пример использования: ~~~
-Clock< Alarm<Alarm1A, 1000>, uint64_t > clock;
-Scheduler<  Clock<Alarm<Alarm1A, 1000>, uint32_t>, clock,
+Clock< Alarm<Alarm1A, 1000>, uint32_t > clock;
+Scheduler<  Clock<Alarm<Alarm1A, 1000>, uint16_t>, clock,
 			16, uint16_t > scheduler;
 
 void f (uint16_t nextTime)
@@ -67,6 +67,10 @@ int main ()
 #ifndef SCHEDULER_H_
 #define SCHEDULER_H_
 
+#include <cpp/universal.h>
+#include <cpp/dispatcher.h>
+#include <cpp/timers.h>
+
 template< class Clock, Clock& clock,
 		  uint8_t size,
 		  typename InTime = uint16_t  >
@@ -74,7 +78,6 @@ class Scheduler
 {
 public:
 	Scheduler ()
-//		: clockwork ( InterruptHandler::from_method<Clock, &Clock::incTime>(&clock) )
 	{
 		static_assert (sizeof(InTime) < sizeof(typename Clock::Time), "Тип InTime должен быть меньше, чем Clock::Time");
 	}
@@ -117,6 +120,8 @@ public:
 			com.handler (com.parameter);
 		}
 	}
+
+	static constexpr uint32_t discreetMks = Clock::discreetMks;
 
 private:
 	typedef typename Clock::Time ClockTime;

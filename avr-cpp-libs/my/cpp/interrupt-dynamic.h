@@ -99,9 +99,10 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <cpp/delegate/delegate.hpp>
+#include <cpp/delegate/Clugston/FastDelegate.h>
+using namespace fastdelegate;
 
-typedef Delegate<void ()> InterruptHandler;
+typedef FastDelegate<void ()> InterruptHandler;
 
 #define INTERRUPT_POINTER_DECLARE(NAME_without_vect)\
 	InterruptHandler NAME_without_vect ## _handler;\

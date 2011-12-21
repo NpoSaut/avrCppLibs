@@ -57,6 +57,19 @@
 
 	Lauri Kirikal
 */
+
+/*
+ * MODIFICATION: For clear delegate normal execute on AVR
+ * (Nazemnykh A.D.)
+ *
+ * Solved problem: executing cleared delegate will reset AVR
+ *
+ *	+ I modify GenericClass: add to it EmptyFunction
+ * 	+ And modify DelegateMemento: now his m_pFunction point to EmptyFunction if we have empty delegate
+ *
+ * Nazemnykh A.D.
+ */
+
 #ifdef __AVR__
 #include <string.h>
 #else
@@ -277,7 +290,14 @@ struct VoidToDefaultVoid<void> { typedef DefaultVoid type; };
 	// Codeplay and VC4 can't cope with the unknown_inheritance case either.
 	class GenericClass {};
 #else
-	class GenericClass;
+	// MODIFICATION: For clear delegate normal execute on AVR
+	// (Nazemnykh A.D.)
+	// Originaly was: class GenericClass;
+	class GenericClass
+	{
+	public:
+		void emptyFunction () {};
+	};
 #endif
 
 // The size of a single inheritance member function pointer.
@@ -527,6 +547,12 @@ struct SimplifyMemFunc<SINGLE_MEMFUNCPTR_SIZE + 3*sizeof(int) >
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// MODIFICATION: For clear delegate normal execute on AVR
+// (Nazemnykh A.D.)
+// !	PMemFunc originaly point to 0 if me have empty delegate
+// !	It wrong work under AVR
+// !	Now it point to GenericClass::EmptyFunction
+
 // DelegateMemento -- an opaque structure which can hold an arbitary delegate.
 // It knows nothing about the calling convention or number of arguments used by
 // the function pointed to.
@@ -541,11 +567,11 @@ struct SimplifyMemFunc<SINGLE_MEMFUNCPTR_SIZE + 3*sizeof(int) >
 // This implementation is standard-compliant, but a bit tricky.
 // A static function pointer is stored inside the class. 
 // Here are the valid values:
-// +-- Static pointer --+--pThis --+-- pMemFunc-+-- Meaning------+
-// |   0				|  0       |   0        | Empty          |
-// |   !=0              |(dontcare)|  Invoker   | Static function|
-// |   0                |  !=0     |  !=0*      | Method call    |
-// +--------------------+----------+------------+----------------+
+// +-- Static pointer --+--pThis --+-- pMemFunc-----+-- Meaning------+
+// |   0				|  0       |EmptyFunction   | Empty          |
+// |   !=0              |(dontcare)|  Invoker       | Static function|
+// |   0                |  !=0     |!=EmptyFunction*| Method call    |
+// +--------------------+----------+---------------++----------------+
 //  * For Metrowerks, this can be 0. (first virtual function in a 
 //       single_inheritance class).
 // When stored stored inside a specific delegate, the 'dontcare' entries are replaced
@@ -557,14 +583,15 @@ struct SimplifyMemFunc<SINGLE_MEMFUNCPTR_SIZE + 3*sizeof(int) >
 // For compilers where data pointers are at least as big as code pointers, it is 
 // possible to store the function pointer in the this pointer, using another 
 // horrible_cast. In this case the DelegateMemento implementation is simple:
-// +--pThis --+-- pMemFunc-+-- Meaning---------------------+
-// |    0     |  0         | Empty                         |
-// |  !=0     |  !=0*      | Static function or method call|
-// +----------+------------+-------------------------------+
+// +--pThis --+-- pMemFunc-----+-- Meaning---------------------+
+// |    0     |EmptyFunction   | Empty                         |
+// |  !=0     |!=EmptyFunction*| Static function or method call|
+// +----------+----------------+-------------------------------+
 //  * For Metrowerks, this can be 0. (first virtual function in a 
 //       single_inheritance class).
 // Note that the Sun C++ and MSVC documentation explicitly state that they 
 // support static_cast between void * and function pointers.
+
 
 class DelegateMemento {
 protected: 
@@ -586,8 +613,8 @@ public:
 		m_pthis=0; m_pFunction=0; m_pStaticFunction=0;
 	}
 #else
-	DelegateMemento() : m_pthis(0), m_pFunction(0) {};
-	void clear() {	m_pthis=0; m_pFunction=0;	}
+	DelegateMemento() : m_pthis(0), m_pFunction(&detail::GenericClass::emptyFunction) {};
+	void clear() {	m_pthis=0; m_pFunction=&detail::GenericClass::emptyFunction;	}
 #endif
 public:
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
@@ -622,9 +649,9 @@ public:
 	// We can't just compare m_pFunction because on Metrowerks,
 	// m_pFunction can be zero even if the delegate is not empty!
 	inline bool operator ! () const		// Is it bound to anything?
-	{ return m_pthis==0 && m_pFunction==0; }
+		{ return m_pthis==0 && m_pFunction==&detail::GenericClass::emptyFunction; }
 	inline bool empty() const		// Is it bound to anything?
-	{ return m_pthis==0 && m_pFunction==0; }
+		{ return m_pthis==0 && m_pFunction==&detail::GenericClass::emptyFunction; }
 public:
 	DelegateMemento & operator = (const DelegateMemento &right)  {
 		SetMementoFrom(right); 
@@ -2113,6 +2140,7 @@ FastDelegate8<Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, FA
 #undef FASTDLGT_RETTYPE
 
 } // namespace fastdelegate
+
 
 #endif // !defined(FASTDELEGATE_H)
 

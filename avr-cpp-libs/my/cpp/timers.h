@@ -232,6 +232,8 @@ public:
 		*compareInterrupt = interruptHandler_;
 		enable ();
 	}
+
+	static constexpr uint32_t periodMks = tMks;
 };
 
 //  8-битные таймеры.
@@ -315,10 +317,11 @@ class Clock
 {
 public:
 	typedef TimeT Time;
+	static constexpr uint32_t discreetMks =  ClockSampleAlarm::periodMks;
 
 	Clock ()
-		: time (0),
-		  alarm ( InterruptHandler::from_method<Clock, &Clock::incTime>(this) )
+		: alarm ( InterruptHandler (this, &Clock::incTime) ),
+		  time (0)
 	{}
 	const Time& getTime () const
 	{

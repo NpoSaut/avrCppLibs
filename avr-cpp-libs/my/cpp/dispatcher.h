@@ -55,9 +55,10 @@
 #ifndef DISPATCHER_H_
 #define DISPATCHER_H_
 
-#include <cpp/delegate/delegate.hpp>
+#include <cpp/delegate/Clugston/FastDelegate.h>
+using namespace fastdelegate;
 
-typedef Delegate<void (uint16_t)> SoftIntHandler;
+typedef FastDelegate<void (uint16_t)> SoftIntHandler;
 
 //struct Sixteen
 //{
@@ -96,6 +97,7 @@ public:
 			{
 				com = command[head];
 				head++;
+				size --;
 			}
 		}
 
@@ -110,23 +112,28 @@ public:
 		return tail - head;
 	}
 
-private:
-	 volatile uint8_t size;
-	 Command command[256];
-	 volatile uint8_t head 	;
-	 volatile uint8_t tail 	;
+	volatile uint8_t size;
 
-	 uint8_t blockNumber ()
-	 {
-			uint8_t blockedNumber;
-			ATOMIC
+private:
+	Command command[256];
+	volatile uint8_t head;
+	volatile uint8_t tail;
+
+	uint8_t blockNumber ()
+	{
+		uint8_t blockedNumber;
+		ATOMIC
+		{
+			size ++;
+			blockedNumber = tail;
+			if ( ++tail == head )
 			{
-				blockedNumber = tail;
-				if ( ++tail == head )
-					++head;
+				++head;
+				size --;
 			}
-			return blockedNumber;
-	 }
+		}
+		return blockedNumber;
+	}
 };
 
 Dispatcher dispatcher;
