@@ -85,17 +85,17 @@ public:
 	{
 		for (Task& t : task)
 		{
-			bool choosed = false;
 			ATOMIC
-				if (t.active != 1) // Empty
-				{
-					t.active = 1;
-					choosed = true;
-				}
-			if (choosed)
+			{
+				if (t.active != 1 && t.blocked != 1) // Empty and unblocked
+					t.blocked = 1;
+			}
+			if (t.blocked)
 			{
 				t.time = clock.getTime() + time;
 				t.command = command;
+				t.active = 1;
+				t.blocked = 0;
 				return true;
 			}
 		}
@@ -106,18 +106,13 @@ public:
 	{
 		for (Task& t : task)
 		{
-			Command com;
-			ATOMIC
-			{
-				if ( t.active )
-					if ( t.timeHighBit == _cast( Time, clock.getTime() ).highBit
-							&& t.timeLowPart < _cast( Time, clock.getTime() ).lowPart )
-					{
-						t.active = 0;
-						com = t.command;
-					}
-			}
-			com.handler (com.parameter);
+			if ( t.active )
+				if ( t.timeHighBit == _cast( Time, clock.getTime() ).highBit
+						&& t.timeLowPart < _cast( Time, clock.getTime() ).lowPart )
+				{
+					t.command.handler (t.command.parameter);
+					t.active = 0;
+				}
 		}
 	}
 
@@ -134,6 +129,7 @@ private:
 			{
 				ClockTime time		:sizeof(InTime)*8+1;
 				ClockTime active	:1;
+				ClockTime blocked	:1;
 			};
 			struct
 			{

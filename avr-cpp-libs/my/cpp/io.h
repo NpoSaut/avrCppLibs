@@ -170,6 +170,11 @@ public:
 	{
 		return &bit;
 	}
+	const Bit* operator-> () const
+	{
+		return &bit;
+	}
+
 
 	union
 	{

@@ -182,9 +182,6 @@ private:
 public:
 	Alarm (InterruptHandler interruptHandler_)
 	{
-		// Устанавливаем обработчик
-		*compareInterrupt = interruptHandler_;
-
 		// Рассчёт оптимального делителя и счётчика для обеспечения Tmks
 		typedef typename TimerSize<TimerType>::Result CompareType;
 
@@ -211,19 +208,33 @@ public:
 		(reg.*control)->clockType_ = prsc;
 		(reg.*control)->waveform_ = ControlType::ClearOnCompare;
 		(reg.*control)->outputMode_ = ControlType::OutPinDisconnect;
-		(reg.*interruptMask)->CompInterrupt = true;
+//		(reg.*interruptMask)->CompInterrupt = true;
+
+		// Устанавливаем обработчик
+		*compareInterrupt = interruptHandler_;
 	}
 
-	void enable ()
+	void start ()
+	{
+		reset ();
+		enable ();
+	}
+	void reset ()
 	{
 		(reg.*counter) = 0;
 		(reg.*interruptFlag)->CompOccur = 1; // clear
+	}
+	void enable ()
+	{
 		(reg.*interruptMask)->CompInterrupt = true;
 	}
-
 	void disable ()
 	{
 		(reg.*interruptMask)->CompInterrupt = false;
+	}
+	bool isEnable () const
+	{
+		return (reg.*interruptMask)->CompInterrupt;
 	}
 
 	void newInterruptHandler (InterruptHandler interruptHandler_)
@@ -234,6 +245,150 @@ public:
 	}
 
 	static constexpr uint32_t periodMks = tMks;
+};
+
+template < 	class TimerType, TimerType Register::* control,
+			volatile typename TimerSize<TimerType>::Result Register::* counter,
+			volatile typename TimerSize<TimerType>::Result Register::* compare,
+			typename TimerInterruptMaskType<TimerType>::Result Register::* interruptMask,
+			typename TimerInterruptFlagType<TimerType>::Result Register::* interruptFlag,
+			InterruptHandler* compareInterrupt >
+class AlarmAdjust
+{
+private:
+	typedef decltype((reg.*control).bit) ControlType;
+	typedef typename ControlType::ClockType ClockType;
+
+	typedef typename TimerSize<TimerType>::Result CompareType;
+
+	ClockType selectClockType (const uint16_t& prescale) const
+	{
+		switch (prescale)
+		{
+			case 1:
+				return ClockType::Prescale1;
+				break;
+			case 8:
+				return ClockType::Prescale8;
+				break;
+			case 64:
+				return ClockType::Prescale64;
+				break;
+			case 256:
+				return ClockType::Prescale256;
+				break;
+			case 1024:
+				return ClockType::Prescale1024;
+				break;
+		}
+	}
+	uint16_t getPrescale (const ClockType& clockType) const
+	{
+		switch (clockType)
+		{
+			case ClockType::Prescale1:
+				return 1;
+				break;
+			case ClockType::Prescale8:
+				return 8;
+				break;
+			case ClockType::Prescale64:
+				return 64;
+				break;
+			case ClockType::Prescale256:
+				return 256;
+				break;
+			case ClockType::Prescale1024:
+				return 1024;
+				break;
+		}
+	}
+
+
+public:
+	AlarmAdjust ()
+	{
+		// Если обработчик не будет задан, но таймер будет переведён в активный режим,
+		// то хотя бы вызывать прерывание как можно реже
+		(reg.*compare) = maxForType<CompareType> ();
+		(reg.*control)->clockType_ = ClockType::Prescale1024;
+		(reg.*control)->waveform_ = ControlType::ClearOnCompare;
+		(reg.*control)->outputMode_ = ControlType::OutPinDisconnect;
+//		(reg.*interruptMask)->CompInterrupt = true;
+	}
+	AlarmAdjust (const uint32_t& tMks, InterruptHandler interruptHandler_)
+	{
+		setPeriod (tMks);
+		*compareInterrupt = interruptHandler_;
+	}
+
+	uint32_t setPeriod (const uint32_t& tMks) __attribute__((noinline))
+	{
+		// Рассчёт оптимального делителя и счётчика для обеспечения Tmks
+		uint16_t betterPrescale;
+		uint32_t betterT;
+		CompareType betterCompare;
+
+		for ( uint16_t prescale = 1; prescale <= 1024; prescale *= (prescale < 64 ? 8 : 4) ) // 1, 8, 64, 256, 1024
+		{
+			uint32_t fullCompare = tMks * (F_CPU/1000000) / prescale - 1;
+			if ( fullCompare > maxForType<CompareType> () )
+				fullCompare = maxForType<CompareType> ();
+			CompareType myCompare = fullCompare;
+
+			uint32_t myT = uint32_t (myCompare + 1) * prescale / (F_CPU/1000000);
+
+			if ( abs (betterT - tMks) > abs (myT - tMks) )
+			{
+				betterT = myT;
+				betterPrescale = prescale;
+				betterCompare = myCompare;
+			}
+		}
+
+		(reg.*compare) = betterCompare;
+		(reg.*control)->clockType_ = selectClockType(betterPrescale);
+		(reg.*control)->waveform_ = ControlType::ClearOnCompare;
+		(reg.*control)->outputMode_ = ControlType::OutPinDisconnect;
+		(reg.*interruptMask)->CompInterrupt = true;
+
+		return betterT;
+	}
+
+	uint32_t getPeriod () const __attribute__((noinline))
+	{
+		return uint32_t ((reg.*compare) + 1) * getPrescale( (reg.*control)->clockType_ ) / (F_CPU/1000000);
+	}
+
+	void start ()
+	{
+		reset ();
+		enable ();
+	}
+	void reset ()
+	{
+		(reg.*counter) = 0;
+		(reg.*interruptFlag)->CompOccur = 1; // clear
+	}
+	void enable ()
+	{
+		(reg.*interruptMask)->CompInterrupt = true;
+	}
+	void disable ()
+	{
+		(reg.*interruptMask)->CompInterrupt = false;
+	}
+	bool isEnable () const
+	{
+		return (reg.*interruptMask)->CompInterrupt;
+	}
+
+	void newInterruptHandler (InterruptHandler interruptHandler_)
+	{
+		disable ();
+		*compareInterrupt = interruptHandler_;
+		enable ();
+	}
 };
 
 //  8-битные таймеры.
@@ -322,7 +477,9 @@ public:
 	Clock ()
 		: alarm ( InterruptHandler (this, &Clock::incTime) ),
 		  time (0)
-	{}
+	{
+		alarm.start ();
+	}
 	const Time& getTime () const
 	{
 		return time;

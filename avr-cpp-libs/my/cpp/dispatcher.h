@@ -79,6 +79,10 @@ class Dispatcher
 public:
 	typedef ::Command Command;
 
+	Dispatcher ()
+		: head (0), tail (0), size (0), maxSize (0)
+	{}
+
 	void add (const SoftIntHandler& handler_, const uint16_t& param)
 	{
 		command[ blockNumber() ] = {handler_, param};
@@ -101,23 +105,22 @@ public:
 			}
 		}
 
+		if (size > maxSize)
+			maxSize = size;
+
 		if (com.handler)
 			com.handler (com.parameter);
 //		else
 //			asm volatile ("nop");
 	}
 
-	uint8_t getSize () const
-	{
-		return tail - head;
-	}
-
-	volatile uint8_t size;
+	volatile uint8_t maxSize;
 
 private:
 	Command command[256];
 	volatile uint8_t head;
 	volatile uint8_t tail;
+	volatile uint8_t size;
 
 	uint8_t blockNumber ()
 	{
