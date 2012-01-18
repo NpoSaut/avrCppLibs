@@ -475,7 +475,8 @@ public:
 	static constexpr uint32_t discreetMks =  ClockSampleAlarm::periodMks;
 
 	Clock ()
-		: alarm ( InterruptHandler (this, &Clock::incTime) ),
+		: alarm ( InterruptHandler::from_method <Clock, &Clock::incTime>(this) ),
+//		: alarm ( InterruptHandler (this, &Clock::incTime) ),
 		  time (0)
 	{
 		alarm.start ();

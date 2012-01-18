@@ -55,10 +55,9 @@
 #ifndef DISPATCHER_H_
 #define DISPATCHER_H_
 
-#include <cpp/delegate/Clugston/FastDelegate.h>
-using namespace fastdelegate;
+#include <cpp/delegate/delegate.hpp>
 
-typedef FastDelegate<void (uint16_t)> SoftIntHandler;
+typedef Delegate<void (uint16_t)> SoftIntHandler;
 
 //struct Sixteen
 //{
