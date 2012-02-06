@@ -85,19 +85,22 @@ public:
 	{
 		for (Task& t : task)
 		{
-			ATOMIC
+			uint8_t sreg = SREG; // Remember last state
+			cli ();
+
+			if (t.active != 1 && t.blocked != 1) // Empty and unblocked
 			{
-				if (t.active != 1 && t.blocked != 1) // Empty and unblocked
-					t.blocked = 1;
-			}
-			if (t.blocked)
-			{
+				t.blocked = 1;
+				SREG = sreg;
+
 				t.time = clock.getTime() + time;
 				t.command = command;
 				t.active = 1;
 				t.blocked = 0;
 				return true;
 			}
+			else
+				SREG = sreg;
 		}
 		return false;
 	}
@@ -107,12 +110,14 @@ public:
 		for (Task& t : task)
 		{
 			if ( t.active )
-				if ( t.timeHighBit == _cast( Time, clock.getTime() ).highBit
-						&& t.timeLowPart < _cast( Time, clock.getTime() ).lowPart )
+			{
+				Bitfield<Time> time( clock.getTime() );
+				if ( t.timeHighBit == time->highBit	&& t.timeLowPart < time->lowPart )
 				{
 					t.command.handler (t.command.parameter);
 					t.active = 0;
 				}
+			}
 		}
 	}
 
@@ -127,15 +132,15 @@ private:
 		{
 			struct
 			{
-				ClockTime time		:sizeof(InTime)*8+1;
-				ClockTime active	:1;
-				ClockTime blocked	:1;
+				volatile ClockTime time		:sizeof(InTime)*8+1;
+				volatile ClockTime active	:1;
+				volatile ClockTime blocked	:1;
 			};
 			struct
 			{
-				ClockTime timeLowPart	:sizeof(InTime)*8;
-				ClockTime timeHighBit	:1;
-				ClockTime				:1;
+				volatile ClockTime timeLowPart	:sizeof(InTime)*8;
+				volatile ClockTime timeHighBit	:1;
+				volatile ClockTime				:2;
 			};
 		};
 	};

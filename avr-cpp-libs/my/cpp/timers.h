@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <cpp/interrupt-dynamic.h>
 #include <cpp/io.h>
-
+#include <cpp/thread-safe.h>
 
 
 //template < 	typename control, typename counter, typename compare,
@@ -481,14 +481,14 @@ public:
 	{
 		alarm.start ();
 	}
-	const Time& getTime () const
+	const Time getTime () const
 	{
-		return time;
+		return (+time);
 	}
 
 private:
 	ClockSampleAlarm alarm;
-	Time time;
+	Safe<Time> time;
 
 	void incTime ()
 	{
