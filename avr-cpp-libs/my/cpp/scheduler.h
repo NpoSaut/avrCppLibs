@@ -97,6 +97,8 @@ public:
 				t.command = command;
 				t.active = 1;
 				t.blocked = 0;
+
+				fill ++;
 				return true;
 			}
 			else
@@ -116,12 +118,15 @@ public:
 				{
 					t.command.handler (t.command.parameter);
 					t.active = 0;
+					fill --;
 				}
 			}
 		}
 	}
 
 	static constexpr uint32_t discreetMks = Clock::discreetMks;
+
+	volatile uint8_t fill;
 
 private:
 	typedef typename Clock::Time ClockTime;
