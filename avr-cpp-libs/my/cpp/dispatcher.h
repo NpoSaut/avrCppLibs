@@ -79,7 +79,7 @@ public:
 	typedef ::Command Command;
 
 	Dispatcher ()
-		: head (0), tail (0), size (0), maxSize (0)
+		: head (0), tail (0)
 	{}
 
 	void add (const SoftIntHandler& handler_, const uint16_t& param)
@@ -100,12 +100,8 @@ public:
 			{
 				com = command[head];
 				head++;
-				size --;
 			}
 		}
-
-		if (size > maxSize)
-			maxSize = size;
 
 		if (com.handler)
 			com.handler (com.parameter);
@@ -113,25 +109,20 @@ public:
 //			asm volatile ("nop");
 	}
 
-	volatile uint8_t maxSize;
-
 private:
 	Command command[256];
 	volatile uint8_t head;
 	volatile uint8_t tail;
-	volatile uint8_t size;
 
 	uint8_t blockNumber ()
 	{
 		uint8_t blockedNumber;
 		ATOMIC
 		{
-			size ++;
 			blockedNumber = tail;
 			if ( ++tail == head )
 			{
 				++head;
-				size --;
 			}
 		}
 		return blockedNumber;
