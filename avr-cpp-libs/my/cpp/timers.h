@@ -493,6 +493,7 @@ private:
 	void incTime ()
 	{
 		time ++;
+		sei ();
 	}
 };
 
