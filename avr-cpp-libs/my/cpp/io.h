@@ -15,6 +15,8 @@
 #include <cpp/io/usart.h>
 #include <cpp/io/spi.h>
 #include <cpp/io/watchdog.h>
+#include <cpp/io/eeprom.h>
+#include <cpp/io/can.h>
 
 
 
@@ -228,9 +230,9 @@ struct Register
 
 	volatile uint8_t general0; // 0x3E
 
-	volatile uint8_t eepromControl; // 0x3F
-	volatile uint8_t eepromData; // 0x40
-	volatile uint16_t eepromAddress; // 0x41
+	Bitfield< EepromControl >	eepromControl; // 0x3F
+	volatile uint8_t 			eepromData; // 0x40
+	volatile uint8_t*			eepromAddress; // 0x41
 
 	volatile uint8_t			timerGeneral; // 0x43
 	Bitfield< TimerControl8 >	timer0Control; // 0x44

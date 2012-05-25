@@ -41,15 +41,34 @@
 
 #include <avr/eeprom.h>
 
+#include <cpp/io.h>
+#include <cpp/interrupt-dynamic.h>
+#include <cpp/dispatcher.h>
+
+
+namespace EepromStaticPrivate
+{
+	 volatile uint8_t byteNumber = 0; 	// 0 - no active write, 1...4 - active
+	 Complex<uint32_t> writingVar;		// 4 байта максимум
+	 uint8_t* startAddress;				// address of low byte
+	 SoftIntHandler afterWrite;
+
+	 void writeNextByte ();
+	 void interruptHandler ();
+	 void interruptHandler (uint16_t) { interruptHandler(); }
+
+	 class Init
+	 {
+	 public:
+		 Init () { EE_READY_handler = InterruptHandler::from_function<&interruptHandler>(); }
+	 } init;
+}
+
 template<typename Type>
 class Eeprom
 {
 public:
-	explicit Eeprom ()
-	{
-		static_assert ( sizeof(Type)==1 || sizeof(Type)==2 || sizeof(Type)==4,
-						"Unsupported type");
-	}
+	explicit Eeprom ();
 
 	void operator= (const Type& var) volatile
 	{
@@ -81,8 +100,91 @@ public:
 		return var;
 	}
 
+	bool writeUnblock( const Type& var, const SoftIntHandler& runAfterWriteEnd = SoftIntHandler() );
+	bool ready () volatile { return EepromStaticPrivate::byteNumber == 0; }
+
 private:
 	Type var;
 };
+
+
+template<typename Type>
+Eeprom<Type>::Eeprom ()
+{
+	static_assert ( sizeof(Type)==1 || sizeof(Type)==2 || sizeof(Type)==4,
+					"Unsupported type");
+}
+
+template<typename Type>
+bool Eeprom<Type>::writeUnblock(const Type& var, const SoftIntHandler& runAfterWriteEnd)
+{
+	volatile uint8_t sreg = reg.status;
+	cli ();
+	if ( EepromStaticPrivate::byteNumber == 0  ) // no active write
+	{
+		EepromStaticPrivate::byteNumber = sizeof(Type);
+		reg.status = sreg;
+
+		EepromStaticPrivate::writingVar = var;
+		EepromStaticPrivate::startAddress = (uint8_t *)this;
+		EepromStaticPrivate::afterWrite = runAfterWriteEnd;
+
+		cli();
+		if ( !reg.eepromControl && !(reg.pgmStore & 1) ) // no flag in eepromControl
+		{
+			EepromStaticPrivate::writeNextByte();
+			reg.status = sreg;
+			return true;
+		}
+		else
+		{
+			EepromStaticPrivate::byteNumber = 0; // free
+			reg.status = sreg;
+			return false;
+		}
+	}
+	else
+	{
+		reg.status = sreg;
+		return false;
+	}
+}
+
+namespace EepromStaticPrivate
+{
+	void writeNextByte ()
+	{
+		uint8_t num = --byteNumber;
+		reg.eepromAddress = startAddress+num;
+		reg.eepromData = writingVar[num];
+
+		Bitfield<EepromControl> ctr;
+		ctr->readEnable_ = false;
+		ctr->writeEnable_ = false;
+		ctr->masterWriteEnable_ = true;
+		ctr->interruptEnable_ = true;
+		reg.eepromControl = ctr; // Prepare
+
+		ctr->readEnable_ = false;
+		ctr->writeEnable_ = true;
+		ctr->masterWriteEnable_ = true;
+		ctr->interruptEnable_ = true;
+		reg.eepromControl = ctr; // Start!
+	}
+
+	void interruptHandler ()
+	{
+		if ( byteNumber != 0 )
+			writeNextByte();
+		else
+		{
+			reg.eepromControl = 0;
+			sei ();
+			if ( afterWrite )
+				dispatcher.add( afterWrite, (uint16_t)startAddress );
+		}
+		sei ();
+	}
+}
 
 #endif /* CPP_EEPROM_H_ */
