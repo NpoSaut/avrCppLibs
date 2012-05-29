@@ -5,27 +5,7 @@
 #  error "Include <cpp/io.h> instead of this file."
 #endif
 
-// Дырявые поля используются
-// для корректной работы c разбросанными битами
-template < typename Enum, uint32_t mask >
-class HoleField
-{
-public:
-	void operator= (Enum a) volatile
-	{
-		var = Enum ( (var & (~mask)) | (a & mask) );
-	}
-	void operator= (Enum a)
-	{
-		var = Enum ( (var & (~mask)) | (a & mask) );
-	}
-	operator Enum ()
-	{
-		return Enum (var & mask);
-	}
-private:
-	Enum var;
-};
+#include <cpp/io/hole-field.h>
 
 struct TimerControl8
 {
@@ -134,35 +114,41 @@ struct TimerControl8_2
 };
 
 
-union TimerInterruptMask8
+struct TimerInterruptMask8
 {
-	struct
+	union
 	{
-		volatile uint8_t OverflowInterrupt	:1;
-		volatile uint8_t CompInterrupt		:1;
-		volatile uint8_t 					:6;
-	};
-	struct
-	{
-		uint8_t OverflowInterrupt_	:1;
-		uint8_t CompInterrupt_ 		:1;
-		uint8_t 					:6;
+		struct
+		{
+			volatile uint8_t OverflowInterrupt	:1;
+			volatile uint8_t CompInterrupt		:1;
+			volatile uint8_t 					:6;
+		};
+		struct
+		{
+			uint8_t OverflowInterrupt_	:1;
+			uint8_t CompInterrupt_ 		:1;
+			uint8_t 					:6;
+		};
 	};
 };
 
-union TimerInterruptFlag8
+struct TimerInterruptFlag8
 {
-	struct
+	union
 	{
-		volatile uint8_t OverflowOccur	:1;
-		volatile uint8_t CompOccur		:1;
-		volatile uint8_t 				:6;
-	};
-	struct
-	{
-		uint8_t OverflowOccur_	:1;
-		uint8_t CompOccur_ 		:1;
-		uint8_t 				:6;
+		struct
+		{
+			volatile uint8_t OverflowOccur	:1;
+			volatile uint8_t CompOccur		:1;
+			volatile uint8_t 				:6;
+		};
+		struct
+		{
+			uint8_t OverflowOccur_	:1;
+			uint8_t CompOccur_ 		:1;
+			uint8_t 				:6;
+		};
 	};
 };
 
@@ -270,75 +256,81 @@ struct TimerControl16
 	};
 };
 
-union TimerInterruptFlag16
+struct TimerInterruptFlag16
 {
-	struct
+	union
 	{
-		volatile uint8_t 					:1;
-		volatile uint8_t CompOccur			:1;
-		volatile uint8_t 					:6;
-	};
-	struct
-	{
-		volatile uint8_t OverflowOccur		:1;
-		volatile uint8_t CompAOccur			:1;
-		volatile uint8_t CompBOccur			:1;
-		volatile uint8_t CompCOccur			:1;
-		volatile uint8_t 					:1;
-		volatile uint8_t InputCaptureOccur	:1;
-		volatile uint8_t 					:2;
-	};
-	struct
-	{
-		uint8_t 					:1;
-		uint8_t CompOccur_			:1;
-		uint8_t 					:6;
-	};
-	struct
-	{
-		uint8_t OverflowOccur_		:1;
-		uint8_t CompAOccur_ 		:1;
-		uint8_t CompBOccur_			:1;
-		uint8_t CompCOccur_			:1;
-		uint8_t 					:1;
-		uint8_t InputCaptureOccur_	:1;
-		uint8_t 					:2;
+		struct
+		{
+			volatile uint8_t 					:1;
+			volatile uint8_t CompOccur			:1;
+			volatile uint8_t 					:6;
+		};
+		struct
+		{
+			volatile uint8_t OverflowOccur		:1;
+			volatile uint8_t CompAOccur			:1;
+			volatile uint8_t CompBOccur			:1;
+			volatile uint8_t CompCOccur			:1;
+			volatile uint8_t 					:1;
+			volatile uint8_t InputCaptureOccur	:1;
+			volatile uint8_t 					:2;
+		};
+		struct
+		{
+			uint8_t 					:1;
+			uint8_t CompOccur_			:1;
+			uint8_t 					:6;
+		};
+		struct
+		{
+			uint8_t OverflowOccur_		:1;
+			uint8_t CompAOccur_ 		:1;
+			uint8_t CompBOccur_			:1;
+			uint8_t CompCOccur_			:1;
+			uint8_t 					:1;
+			uint8_t InputCaptureOccur_	:1;
+			uint8_t 					:2;
+		};
 	};
 };
 
-union TimerInterruptMask16
+struct TimerInterruptMask16
 {
-	struct
+	union
 	{
-		volatile uint8_t 					:1;
-		volatile uint8_t CompInterrupt		:1;
-		volatile uint8_t 					:6;
-	};
-	struct
-	{
-		volatile uint8_t OverflowInterrupt		:1;
-		volatile uint8_t CompAInterrupt			:1;
-		volatile uint8_t CompBInterrupt			:1;
-		volatile uint8_t CompCInterrupt			:1;
-		volatile uint8_t 						:1;
-		volatile uint8_t InputCaptureInterrupt	:1;
-		volatile uint8_t 						:2;
-	};
-	struct
-	{
-		uint8_t 					:1;
-		uint8_t CompInterrupt_ 		:1;
-		uint8_t 					:6;
-	};
-	struct
-	{
-		uint8_t OverflowInterrupt_		:1;
-		uint8_t CompAInterrupt_ 		:1;
-		uint8_t CompBInterrupt_			:1;
-		uint8_t CompCInterrupt_			:1;
-		uint8_t 						:1;
-		uint8_t InputCaptureInterrupt_	:1;
-		uint8_t 						:2;
+		struct
+		{
+			volatile uint8_t 					:1;
+			volatile uint8_t CompInterrupt		:1;
+			volatile uint8_t 					:6;
+		};
+		struct
+		{
+			volatile uint8_t OverflowInterrupt		:1;
+			volatile uint8_t CompAInterrupt			:1;
+			volatile uint8_t CompBInterrupt			:1;
+			volatile uint8_t CompCInterrupt			:1;
+			volatile uint8_t 						:1;
+			volatile uint8_t InputCaptureInterrupt	:1;
+			volatile uint8_t 						:2;
+		};
+		struct
+		{
+			uint8_t 					:1;
+			uint8_t CompInterrupt_ 		:1;
+			uint8_t 					:6;
+		};
+		struct
+		{
+			uint8_t OverflowInterrupt_		:1;
+			uint8_t CompAInterrupt_ 		:1;
+			uint8_t CompBInterrupt_			:1;
+			uint8_t CompCInterrupt_			:1;
+			uint8_t 						:1;
+			uint8_t InputCaptureInterrupt_	:1;
+			uint8_t 						:2;
+		};
 	};
 };
 

@@ -176,7 +176,7 @@ private:
 					: maxForType<CompareType> ();
 	}
 
-	typedef decltype((reg.*control).bit) ControlType;
+	typedef typename TimerType::ParentBit ControlType;
 	typedef typename ControlType::ClockType ClockType;
 
 public:
@@ -205,10 +205,10 @@ public:
 		else if ( compare1024 	!= max ) { comp = compare1024;	prsc = ClockType::Prescale1024; }
 
 		(reg.*compare) = comp;
-		(reg.*control)->clockType_ = prsc;
-		(reg.*control)->waveform_ = ControlType::ClearOnCompare;
-		(reg.*control)->outputMode_ = ControlType::OutPinDisconnect;
-//		(reg.*interruptMask)->CompInterrupt = true;
+		(reg.*control).clockType_ = prsc;
+		(reg.*control).waveform_ = ControlType::ClearOnCompare;
+		(reg.*control).outputMode_ = ControlType::OutPinDisconnect;
+//		(reg.*interruptMask).CompInterrupt = true;
 
 		// Устанавливаем обработчик
 		*compareInterrupt = interruptHandler_;
@@ -222,19 +222,19 @@ public:
 	void reset ()
 	{
 		(reg.*counter) = 0;
-		(reg.*interruptFlag)->CompOccur = 1; // clear
+		(reg.*interruptFlag).CompOccur = 1; // clear
 	}
 	void enable ()
 	{
-		(reg.*interruptMask)->CompInterrupt = true;
+		(reg.*interruptMask).CompInterrupt = true;
 	}
 	void disable ()
 	{
-		(reg.*interruptMask)->CompInterrupt = false;
+		(reg.*interruptMask).CompInterrupt = false;
 	}
 	bool isEnable () const
 	{
-		return (reg.*interruptMask)->CompInterrupt;
+		return (reg.*interruptMask).CompInterrupt;
 	}
 
 	void newInterruptHandler (InterruptHandler interruptHandler_)
@@ -256,7 +256,7 @@ template < 	class TimerType, TimerType Register::* control,
 class AlarmAdjust
 {
 private:
-	typedef decltype((reg.*control).bit) ControlType;
+	typedef typename TimerType::ParentBit ControlType;
 	typedef typename ControlType::ClockType ClockType;
 
 	typedef typename TimerSize<TimerType>::Result CompareType;
@@ -311,10 +311,10 @@ public:
 		// Если обработчик не будет задан, но таймер будет переведён в активный режим,
 		// то хотя бы вызывать прерывание как можно реже
 		(reg.*compare) = maxForType<CompareType> ();
-		(reg.*control)->clockType_ = ClockType::Prescale1024;
-		(reg.*control)->waveform_ = ControlType::ClearOnCompare;
-		(reg.*control)->outputMode_ = ControlType::OutPinDisconnect;
-//		(reg.*interruptMask)->CompInterrupt = true;
+		(reg.*control).clockType_ = ClockType::Prescale1024;
+		(reg.*control).waveform_ = ControlType::ClearOnCompare;
+		(reg.*control).outputMode_ = ControlType::OutPinDisconnect;
+//		(reg.*interruptMask).CompInterrupt = true;
 	}
 	AlarmAdjust (const uint32_t& tMks, InterruptHandler interruptHandler_)
 	{
@@ -347,17 +347,17 @@ public:
 		}
 
 		(reg.*compare) = betterCompare;
-		(reg.*control)->clockType_ = selectClockType(betterPrescale);
-		(reg.*control)->waveform_ = ControlType::ClearOnCompare;
-		(reg.*control)->outputMode_ = ControlType::OutPinDisconnect;
-		(reg.*interruptMask)->CompInterrupt = true;
+		(reg.*control).clockType_ = selectClockType(betterPrescale);
+		(reg.*control).waveform_ = ControlType::ClearOnCompare;
+		(reg.*control).outputMode_ = ControlType::OutPinDisconnect;
+		(reg.*interruptMask).CompInterrupt = true;
 
 		return betterT;
 	}
 
 	uint32_t getPeriod () const __attribute__((noinline))
 	{
-		return uint32_t ((reg.*compare) + 1) * getPrescale( (reg.*control)->clockType_ ) / (F_CPU/1000000);
+		return uint32_t ((reg.*compare) + 1) * getPrescale( (reg.*control).clockType_ ) / (F_CPU/1000000);
 	}
 
 	void start ()
@@ -368,19 +368,19 @@ public:
 	void reset ()
 	{
 		(reg.*counter) = 0;
-		(reg.*interruptFlag)->CompOccur = 1; // clear
+		(reg.*interruptFlag).CompOccur = 1; // clear
 	}
 	void enable ()
 	{
-		(reg.*interruptMask)->CompInterrupt = true;
+		(reg.*interruptMask).CompInterrupt = true;
 	}
 	void disable ()
 	{
-		(reg.*interruptMask)->CompInterrupt = false;
+		(reg.*interruptMask).CompInterrupt = false;
 	}
 	bool isEnable () const
 	{
-		return (reg.*interruptMask)->CompInterrupt;
+		return (reg.*interruptMask).CompInterrupt;
 	}
 
 	void newInterruptHandler (InterruptHandler interruptHandler_)
@@ -450,13 +450,13 @@ public:
 //	void enable ()
 //	{
 //		(reg.*counter) = 0;
-//		(reg.*interruptFlag)->CompOccur = 1; // clear
-//		(reg.*interruptMask)->CompInterrupt = true;
+//		(reg.*interruptFlag).CompOccur = 1; // clear
+//		(reg.*interruptMask).CompInterrupt = true;
 //	}
 //
 //	void disable ()
 //	{
-//		(reg.*interruptMask)->CompInterrupt = false;
+//		(reg.*interruptMask).CompInterrupt = false;
 //	}
 //
 //	void newInterruptHandler (InterruptHandler interruptHandler_)

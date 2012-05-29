@@ -5,7 +5,7 @@
 #  error "Include <cpp/io.h> instead of this file."
 #endif
 
-union WatchdogControl
+struct WatchdogControl
 {
 	enum TimeOut
 	{
@@ -18,19 +18,22 @@ union WatchdogControl
 		t1s		= 0b110,
 		t2s		= 0b111
 	};
-	struct
+	union
 	{
-		volatile TimeOut timeOut	:3;
-		volatile uint8_t enable		:1;
-		volatile uint8_t change		:1;
-		volatile uint8_t 			:3;
-	};
-	struct
-	{
-		TimeOut timeOut_	:3;
-		uint8_t enable_		:1;
-		uint8_t change_		:1;
-		uint8_t 			:3;
+		struct
+		{
+			volatile TimeOut timeOut	:3;
+			volatile uint8_t enable		:1;
+			volatile uint8_t change		:1;
+			volatile uint8_t 			:3;
+		};
+		struct
+		{
+			TimeOut timeOut_	:3;
+			uint8_t enable_		:1;
+			uint8_t change_		:1;
+			uint8_t 			:3;
+		};
 	};
 };
 

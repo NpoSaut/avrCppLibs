@@ -114,7 +114,7 @@ public:
 			if ( t.active )
 			{
 				Bitfield<Time> time( clock.getTime() );
-				if ( t.timeHighBit == time->highBit	&& t.timeLowPart < time->lowPart )
+				if ( t.timeHighBit == time.highBit	&& t.timeLowPart < time.lowPart )
 				{
 					t.command.handler (t.command.parameter);
 					t.active = 0;
@@ -149,13 +149,17 @@ private:
 			};
 		};
 	};
-	union Time
+
+	struct Time
 	{
-		ClockTime full;
-		struct
+		union
 		{
-			ClockTime lowPart	:sizeof(InTime)*8;
-			ClockTime highBit	:1;
+			ClockTime full;
+			struct
+			{
+				ClockTime lowPart	:sizeof(InTime)*8;
+				ClockTime highBit	:1;
+			};
 		};
 	};
 

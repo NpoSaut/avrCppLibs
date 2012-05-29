@@ -136,67 +136,56 @@ template <uint8_t size> struct TypeSelect;
 
 // Для имеющиейся структуры с битовыми полями Bit
 // предосталяет доступ как к целому
-// также сохраняя доступ к элементам через оператор ->
+// также сохраняя доступ к элементам через оператор .
+
 template< typename Bit >
-class Bitfield
+class Bitfield : public Bit
 {
 private:
 	typedef typename TypeSelect< sizeof(Bit) >::Result Base;
+
 public:
+	typedef Bit ParentBit;
+
 	explicit Bitfield (const Base& a = 0)
-		: base (a) {}
+	{
+		operator= (a);
+	}
 	explicit Bitfield (const volatile Base& a)
-		: base (a) {}
+	{
+		*((Base*)this) = a;
+	}
 	Bitfield (const Bit& a)
 	{
 		operator= (a);
 	}
 	void operator = (const Base& a) volatile
 	{
-		base = a;
+		*((Base*)this) = a;
 	}
 	void operator = (const Bitfield& a) volatile
 	{
-		base = a.base;
+		*((Base*)this) = *((Base*)&a);
 	}
 	void operator = (const Bit& a) volatile
 	{
-		base = horrible_cast<Base>(a);
+		*((Base*)this) = *((Base*)&a);
 	}
 	operator volatile Base () volatile const
 	{
-		return base;
+		return *((Base*)this);
 	}
-
-	Bit* operator-> ()
-	{
-		return &bit;
-	}
-	const Bit* operator-> () const
-	{
-		return &bit;
-	}
-
-
-	union
-	{
-		Base base;
-		Bit bit;
-	};
 };
 
 // Если размер Bit не соответсвует никакому базовому типу,
 // то предлагается использовать BitfieldDummy, который не выполняет никаких функций, но
-// предоставляет доступ к элементам Bit через -> для единообразия
+// предоставляет доступ к элементам Bit через . для единообразия
 template< typename Bit >
-class BitfieldDummy
+class BitfieldDummy : public Bit
 {
 public:
-	Bit* operator-> ()
-	{
-		return &bit;
-	}
-	Bit bit;
+	typedef Bit ParentBit;
+
 };
 
 

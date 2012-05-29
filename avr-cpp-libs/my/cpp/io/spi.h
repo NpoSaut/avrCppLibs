@@ -5,7 +5,9 @@
 #  error "Include <cpp/io.h> instead of this file."
 #endif
 
-union SpiStatusControl
+#include <cpp/io/hole-field.h>
+
+struct SpiStatusControl
 {
 	enum Prescale : uint16_t
 	{
@@ -33,33 +35,36 @@ union SpiStatusControl
 		LsbFirst		= 1
 	};
 
-	volatile HoleField<Prescale,0b100000011> prescale;
-	struct
+	union
 	{
-		volatile uint16_t							:2;
-		volatile Phase			phase				:1;
-		volatile LeadingEdge	leadingEdge			:1;
-		volatile uint16_t		master				:1;
-		volatile DataOrder		dataOrder			:1;
-		volatile uint16_t		enable				:1;
-		volatile uint16_t		interruptEnable		:1;
-		volatile uint16_t							:6;
-		volatile uint16_t		writeCollision		:1;
-		volatile uint16_t		transferComplete	:1;
-	};
-	HoleField<Prescale,0b100000011> prescale_;
-	struct
-	{
-		uint16_t							:2;
-		Phase			phase_				:1;
-		LeadingEdge		leadingEdge_		:1;
-		uint16_t		master_				:1;
-		DataOrder		dataOrder_			:1;
-		uint16_t		enable_				:1;
-		uint16_t		interruptEnable_	:1;
-		uint16_t							:6;
-		uint16_t		writeCollision_		:1;
-		uint16_t		transferComplete_	:1;
+		volatile HoleField<Prescale,0b100000011> prescale;
+		struct
+		{
+			volatile uint16_t							:2;
+			volatile Phase			phase				:1;
+			volatile LeadingEdge	leadingEdge			:1;
+			volatile uint16_t		master				:1;
+			volatile DataOrder		dataOrder			:1;
+			volatile uint16_t		enable				:1;
+			volatile uint16_t		interruptEnable		:1;
+			volatile uint16_t							:6;
+			volatile uint16_t		writeCollision		:1;
+			volatile uint16_t		transferComplete	:1;
+		};
+		HoleField<Prescale,0b100000011> prescale_;
+		struct
+		{
+			uint16_t							:2;
+			Phase			phase_				:1;
+			LeadingEdge		leadingEdge_		:1;
+			uint16_t		master_				:1;
+			DataOrder		dataOrder_			:1;
+			uint16_t		enable_				:1;
+			uint16_t		interruptEnable_	:1;
+			uint16_t							:6;
+			uint16_t		writeCollision_		:1;
+			uint16_t		transferComplete_	:1;
+		};
 	};
 };
 

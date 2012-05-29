@@ -125,7 +125,7 @@ bool Eeprom<Type>::writeUnblock(const Type& var, const SoftIntHandler& runAfterW
 		EepromStaticPrivate::byteNumber = sizeof(Type);
 		reg.status = sreg;
 
-		EepromStaticPrivate::writingVar = var;
+		EepromStaticPrivate::writingVar = (uint32_t) var;
 		EepromStaticPrivate::startAddress = (uint8_t *)this;
 		EepromStaticPrivate::afterWrite = runAfterWriteEnd;
 
@@ -159,16 +159,16 @@ namespace EepromStaticPrivate
 		reg.eepromData = writingVar[num];
 
 		Bitfield<EepromControl> ctr;
-		ctr->readEnable_ = false;
-		ctr->writeEnable_ = false;
-		ctr->masterWriteEnable_ = true;
-		ctr->interruptEnable_ = true;
+		ctr.readEnable_ = false;
+		ctr.writeEnable_ = false;
+		ctr.masterWriteEnable_ = true;
+		ctr.interruptEnable_ = true;
 		reg.eepromControl = ctr; // Prepare
 
-		ctr->readEnable_ = false;
-		ctr->writeEnable_ = true;
-		ctr->masterWriteEnable_ = true;
-		ctr->interruptEnable_ = true;
+		ctr.readEnable_ = false;
+		ctr.writeEnable_ = true;
+		ctr.masterWriteEnable_ = true;
+		ctr.interruptEnable_ = true;
 		reg.eepromControl = ctr; // Start!
 	}
 

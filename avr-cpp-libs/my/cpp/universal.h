@@ -16,6 +16,8 @@
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
 
+#include <cpp/loki/TypeTraits.h>
+
 //#include <avr/cpp/Delegate.h>
 //
 //using namespace CppDelegate;
@@ -75,8 +77,12 @@ inline OutputClass horrible_cast(const InputClass input){
 
 // Представляет любую переменную как массив байт
 // нумерация начинается с наименее значащего байта
+template<class Base, uint8_t politic = Loki::TypeTraits<Base>::isFundamental || Loki::TypeTraits<Base>::isPointer>
+class Complex;
+
+// For ordinal types used specialization -->
 template<class Base>
-class Complex
+class Complex<Base, 1>
 {
 public:
 	Complex (const Base& a =0)
@@ -101,6 +107,38 @@ public:
 		{ return *((uint8_t*)this + byteNumber); }
 
 	Base base;
+
+private:
+	void init (uint8_t n) {}
+
+	template< typename... Args >
+	void init (uint8_t n, uint8_t byte, Args... bytes)
+	{
+		operator[] (n) = byte;
+		init (n+1, bytes...);
+	}
+};
+
+template<class Base>
+class Complex<Base, 0> : public Base
+{
+public:
+	explicit Complex () : Base () {}
+	Complex (const Base& a) : Base (a) {}
+
+	using Base::operator=;
+
+	template<typename... Args>
+	Complex (const uint8_t& byte0, const Args&... bytes)
+		{ init (0, byte0, bytes...); }
+	template<typename... Args>
+	Complex (const volatile uint8_t& byte0, const volatile Args&... bytes)
+		{ init (0, byte0, bytes...); }
+
+
+	// Доступ к N-тому байту. 0 байт - наименее значащий
+	uint8_t& operator[] (uint8_t byteNumber)
+		{ return *((uint8_t*)this + byteNumber); }
 
 private:
 	void init (uint8_t n) {}
