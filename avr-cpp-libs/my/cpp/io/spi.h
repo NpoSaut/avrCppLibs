@@ -37,33 +37,19 @@ struct SpiStatusControl
 
 	union
 	{
-		volatile HoleField<Prescale,0b100000011> prescale;
-		struct
-		{
-			volatile uint16_t							:2;
-			volatile Phase			phase				:1;
-			volatile LeadingEdge	leadingEdge			:1;
-			volatile uint16_t		master				:1;
-			volatile DataOrder		dataOrder			:1;
-			volatile uint16_t		enable				:1;
-			volatile uint16_t		interruptEnable		:1;
-			volatile uint16_t							:6;
-			volatile uint16_t		writeCollision		:1;
-			volatile uint16_t		transferComplete	:1;
-		};
-		HoleField<Prescale,0b100000011> prescale_;
+		HoleField<Prescale,0b100000011> prescale;
 		struct
 		{
 			uint16_t							:2;
-			Phase			phase_				:1;
-			LeadingEdge		leadingEdge_		:1;
-			uint16_t		master_				:1;
-			DataOrder		dataOrder_			:1;
-			uint16_t		enable_				:1;
-			uint16_t		interruptEnable_	:1;
+			Phase			phase				:1;
+			LeadingEdge		leadingEdge			:1;
+			uint16_t		master				:1;
+			DataOrder		dataOrder			:1;
+			uint16_t		enable				:1;
+			uint16_t		interruptEnable		:1;
 			uint16_t							:6;
-			uint16_t		writeCollision_		:1;
-			uint16_t		transferComplete_	:1;
+			uint16_t		writeCollision		:1;
+			uint16_t		transferComplete	:1;
 		};
 	};
 };

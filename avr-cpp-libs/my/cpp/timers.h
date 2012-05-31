@@ -97,7 +97,7 @@
 //			{\
 //				_(compare) = n ## retRes;\
 //				cli ();\
-//				_(control).clockType_ = (typename control::Type::ClockType) (retRes);\
+//				_(control).clockType = (typename control::Type::ClockType) (retRes);\
 //				cli ();\
 //				period = result ## retRes;\
 //			}
@@ -111,8 +111,8 @@
 //		#undef RET_IF_BETTER
 //
 //		// Конфигурирование таймера
-//		_(control).waveform_ = control::Type::ClearOnCompare;
-//		_(control).outputMode_ = control::Type::OutPinDisconnect;
+//		_(control).waveform = control::Type::ClearOnCompare;
+//		_(control).outputMode = control::Type::OutPinDisconnect;
 //		_(interruptMask).CompInterrupt = true;
 //	}
 //
@@ -142,19 +142,19 @@
 
 
 template< class TimerType > struct TimerSize;
-	template<> struct TimerSize< Bitfield<TimerControl8> >  { typedef uint8_t Result; };
-	template<> struct TimerSize< Bitfield<TimerControl8_2> >  { typedef uint8_t Result; };
-	template<> struct TimerSize< BitfieldDummy<TimerControl16> > { typedef uint16_t Result; };
+	template<> struct TimerSize< volatile Bitfield<TimerControl8> >  { typedef uint8_t Result; };
+	template<> struct TimerSize< volatile Bitfield<TimerControl8_2> >  { typedef uint8_t Result; };
+	template<> struct TimerSize< volatile BitfieldDummy<TimerControl16> > { typedef uint16_t Result; };
 
 template< class TimerType > struct TimerInterruptMaskType;
-	template<> struct TimerInterruptMaskType< Bitfield<TimerControl8> >  { typedef Bitfield<TimerInterruptMask8>  Result; };
-	template<> struct TimerInterruptMaskType< Bitfield<TimerControl8_2> >  { typedef Bitfield<TimerInterruptMask8>  Result; };
-	template<> struct TimerInterruptMaskType< BitfieldDummy<TimerControl16> > { typedef Bitfield<TimerInterruptMask16> Result; };
+	template<> struct TimerInterruptMaskType< volatile Bitfield<TimerControl8> >  { typedef volatile Bitfield<TimerInterruptMask8>  Result; };
+	template<> struct TimerInterruptMaskType< volatile Bitfield<TimerControl8_2> >  { typedef volatile Bitfield<TimerInterruptMask8>  Result; };
+	template<> struct TimerInterruptMaskType< volatile BitfieldDummy<TimerControl16> > { typedef volatile Bitfield<TimerInterruptMask16> Result; };
 
 template< class TimerType > struct TimerInterruptFlagType;
-	template<> struct TimerInterruptFlagType< Bitfield<TimerControl8> >  { typedef Bitfield<TimerInterruptFlag8>  Result; };
-	template<> struct TimerInterruptFlagType< Bitfield<TimerControl8_2> >  { typedef Bitfield<TimerInterruptFlag8>  Result; };
-	template<> struct TimerInterruptFlagType< BitfieldDummy<TimerControl16> > { typedef Bitfield<TimerInterruptFlag16> Result; };
+	template<> struct TimerInterruptFlagType< volatile Bitfield<TimerControl8> >  { typedef volatile Bitfield<TimerInterruptFlag8>  Result; };
+	template<> struct TimerInterruptFlagType< volatile Bitfield<TimerControl8_2> >  { typedef volatile Bitfield<TimerInterruptFlag8>  Result; };
+	template<> struct TimerInterruptFlagType< volatile BitfieldDummy<TimerControl16> > { typedef volatile Bitfield<TimerInterruptFlag16> Result; };
 
 
 template < 	class TimerType, TimerType Register::* control,
@@ -205,9 +205,9 @@ public:
 		else if ( compare1024 	!= max ) { comp = compare1024;	prsc = ClockType::Prescale1024; }
 
 		(reg.*compare) = comp;
-		(reg.*control).clockType_ = prsc;
-		(reg.*control).waveform_ = ControlType::ClearOnCompare;
-		(reg.*control).outputMode_ = ControlType::OutPinDisconnect;
+		(reg.*control).clockType = prsc;
+		(reg.*control).waveform = ControlType::ClearOnCompare;
+		(reg.*control).outputMode = ControlType::OutPinDisconnect;
 //		(reg.*interruptMask).CompInterrupt = true;
 
 		// Устанавливаем обработчик
@@ -311,9 +311,9 @@ public:
 		// Если обработчик не будет задан, но таймер будет переведён в активный режим,
 		// то хотя бы вызывать прерывание как можно реже
 		(reg.*compare) = maxForType<CompareType> ();
-		(reg.*control).clockType_ = ClockType::Prescale1024;
-		(reg.*control).waveform_ = ControlType::ClearOnCompare;
-		(reg.*control).outputMode_ = ControlType::OutPinDisconnect;
+		(reg.*control).clockType = ClockType::Prescale1024;
+		(reg.*control).waveform = ControlType::ClearOnCompare;
+		(reg.*control).outputMode = ControlType::OutPinDisconnect;
 //		(reg.*interruptMask).CompInterrupt = true;
 	}
 	AlarmAdjust (const uint32_t& tMks, InterruptHandler interruptHandler_)
@@ -347,9 +347,9 @@ public:
 		}
 
 		(reg.*compare) = betterCompare;
-		(reg.*control).clockType_ = selectClockType(betterPrescale);
-		(reg.*control).waveform_ = ControlType::ClearOnCompare;
-		(reg.*control).outputMode_ = ControlType::OutPinDisconnect;
+		(reg.*control).clockType = selectClockType(betterPrescale);
+		(reg.*control).waveform = ControlType::ClearOnCompare;
+		(reg.*control).outputMode = ControlType::OutPinDisconnect;
 		(reg.*interruptMask).CompInterrupt = true;
 
 		return betterT;
@@ -357,7 +357,7 @@ public:
 
 	uint32_t getPeriod () const __attribute__((noinline))
 	{
-		return uint32_t ((reg.*compare) + 1) * getPrescale( (reg.*control).clockType_ ) / (F_CPU/1000000);
+		return uint32_t ((reg.*compare) + 1) * getPrescale( (reg.*control).clockType ) / (F_CPU/1000000);
 	}
 
 	void start ()
@@ -393,13 +393,13 @@ public:
 
 //  8-битные таймеры.
 //  max:    262 144 мкс / F_CPU_Mhz ( для 12Мгц:    21 845 )
-#define Alarm0 	Bitfield<TimerControl8>, &Register::timer0Control, &Register::timer0Counter, &Register::timer0Compare, &Register::timer0InterruptMask, &Register::timer0InterruptFlag, &TIMER0_COMP_handler
-#define Alarm2 	Bitfield<TimerControl8_2>, &Register::timer2Control, &Register::timer2Counter, &Register::timer2Compare, &Register::timer2InterruptMask, &Register::timer2InterruptFlag, &TIMER2_COMP_handler
+#define Alarm0  volatile Bitfield<TimerControl8>, &Register::timer0Control, &Register::timer0Counter, &Register::timer0Compare, &Register::timer0InterruptMask, &Register::timer0InterruptFlag, &TIMER0_COMP_handler
+#define Alarm2 	volatile Bitfield<TimerControl8_2>, &Register::timer2Control, &Register::timer2Counter, &Register::timer2Compare, &Register::timer2InterruptMask, &Register::timer2InterruptFlag, &TIMER2_COMP_handler
 
 // 16-битные таймеры.
 //  max: 67 108 864 мкс / F_CPU_Mhz ( для 12Мгц: 5 592 405 )
-#define Alarm1A	BitfieldDummy<TimerControl16>, &Register::timer1Control, &Register::timer1Counter, &Register::timer1CompareA, &Register::timer1InterruptMask, &Register::timer1InterruptFlag, &TIMER1_COMPA_handler
-#define Alarm3A	BitfieldDummy<TimerControl16>, &Register::timer3Control, &Register::timer3Counter, &Register::timer3CompareA, &Register::timer3InterruptMask, &Register::timer3InterruptFlag, &TIMER3_COMPA_handler
+#define Alarm1A	volatile BitfieldDummy<TimerControl16>, &Register::timer1Control, &Register::timer1Counter, &Register::timer1CompareA, &Register::timer1InterruptMask, &Register::timer1InterruptFlag, &TIMER1_COMPA_handler
+#define Alarm3A	volatile BitfieldDummy<TimerControl16>, &Register::timer3Control, &Register::timer3Counter, &Register::timer3CompareA, &Register::timer3InterruptMask, &Register::timer3InterruptFlag, &TIMER3_COMPA_handler
 
 
 //template < 	class TimerType, TimerType Register::* control,

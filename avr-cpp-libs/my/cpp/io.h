@@ -18,7 +18,7 @@
 #include <cpp/io/eeprom.h>
 #include <cpp/io/can.h>
 
-
+#include <cpp/loki/TypeTraits.h>
 
 template <uint8_t n>
 class Pin
@@ -129,10 +129,10 @@ private:
 
 
 // Подбирает беззнаковый тип нужного размера (в байтах)
-template <uint8_t size> struct TypeSelect;
-	template <> struct TypeSelect<1> { typedef uint8_t Result; };
-	template <> struct TypeSelect<2> { typedef uint16_t Result; };
-	template <> struct TypeSelect<4> { typedef uint32_t Result; };
+template <typename Type, uint8_t size = sizeof(Type)> struct TypeSelect;
+	template <typename Type> struct TypeSelect<Type, 1> { typedef uint8_t Result; };
+	template <typename Type> struct TypeSelect<Type, 2> { typedef uint16_t Result; };
+	template <typename Type> struct TypeSelect<Type, 4> { typedef uint32_t Result; };
 
 // Для имеющиейся структуры с битовыми полями Bit
 // предосталяет доступ как к целому
@@ -142,40 +142,92 @@ template< typename Bit >
 class Bitfield : public Bit
 {
 private:
-	typedef typename TypeSelect< sizeof(Bit) >::Result Base;
+	typedef typename TypeSelect< Bit >::Result Base;
 
 public:
 	typedef Bit ParentBit;
 
-	explicit Bitfield (const Base& a = 0)
+	Bitfield () {}
+	Bitfield (const Base& a)
 	{
 		operator= (a);
 	}
-	explicit Bitfield (const volatile Base& a)
+	Bitfield (const volatile Base& a)
 	{
-		*((Base*)this) = a;
+		operator= (a);
 	}
+
 	Bitfield (const Bit& a)
 	{
 		operator= (a);
 	}
-	void operator = (const Base& a) volatile
+	Bitfield (const volatile Bit& a)
+	{
+		operator= (a);
+	}
+
+	void operator = (const Base& a)
 	{
 		*((Base*)this) = a;
 	}
-	void operator = (const Bitfield& a) volatile
+	void operator = (const volatile Base& a)
+	{
+		*((Base*)this) = a;
+	}
+	void operator = (const Base& a) volatile
+	{
+		*((volatile Base*)this) = a;
+	}
+	void operator = (const volatile Base& a) volatile
+	{
+		*((volatile Base*)this) = a;
+	}
+
+	void operator = (const Bitfield& a)
 	{
 		*((Base*)this) = *((Base*)&a);
+	}
+	void operator = (const volatile Bitfield& a)
+	{
+		*((Base*)this) = *((volatile Base*)&a);
+	}
+	void operator = (const Bitfield& a) volatile
+	{
+		*((volatile Base*)this) = *((Base*)&a);
+	}
+	void operator = (const volatile Bitfield& a) volatile
+	{
+		*((volatile Base*)this) = *((volatile Base*)&a);
+	}
+
+	void operator = (const Bit& a)
+	{
+		*((Base*)this) = *((Base*)&a);
+	}
+	void operator = (const volatile Bit& a)
+	{
+		*((Base*)this) = *((volatile Base*)&a);
 	}
 	void operator = (const Bit& a) volatile
 	{
-		*((Base*)this) = *((Base*)&a);
+		*((volatile Base*)this) = *((Base*)&a);
 	}
-	operator volatile Base () volatile const
+	void operator = (const volatile Bit& a) volatile
+	{
+		*((volatile Base*)this) = *((volatile Base*)&a);
+	}
+
+	operator const Base& () const
 	{
 		return *((Base*)this);
 	}
+	operator const volatile Base& () const volatile
+	{
+		return *((volatile Base*)this);
+	}
 };
+
+
 
 // Если размер Bit не соответсвует никакому базовому типу,
 // то предлагается использовать BitfieldDummy, который не выполняет никаких функций, но
@@ -205,10 +257,10 @@ struct Register
 	Port portF; // 0x2F
 	Port portG; // 0x32
 
-	Bitfield< TimerInterruptFlag8 >		timer0InterruptFlag; // 0x35
-	Bitfield< TimerInterruptFlag16 >	timer1InterruptFlag; // 0x36
-	Bitfield< TimerInterruptFlag8 >		timer2InterruptFlag; // 0x37
-	Bitfield< TimerInterruptFlag16 >	timer3InterruptFlag; // 0x38
+	volatile Bitfield< TimerInterruptFlag8 >		timer0InterruptFlag; // 0x35
+	volatile Bitfield< TimerInterruptFlag16 >		timer1InterruptFlag; // 0x36
+	volatile Bitfield< TimerInterruptFlag8 >		timer2InterruptFlag; // 0x37
+	volatile Bitfield< TimerInterruptFlag16 >		timer3InterruptFlag; // 0x38
 
 	volatile uint8_t reserved39; // 0x39
 	volatile uint8_t reserved3A; // 0x3A
@@ -219,15 +271,15 @@ struct Register
 
 	volatile uint8_t general0; // 0x3E
 
-	Bitfield< EepromControl >	eepromControl; // 0x3F
-	volatile uint8_t 			eepromData; // 0x40
-	volatile uint8_t*			eepromAddress; // 0x41
+	volatile Bitfield< EepromControl >	eepromControl; // 0x3F
+	volatile uint8_t 					eepromData; // 0x40
+	volatile uint8_t*					eepromAddress; // 0x41
 
-	volatile uint8_t			timerGeneral; // 0x43
-	Bitfield< TimerControl8 >	timer0Control; // 0x44
-	volatile uint8_t			reserved45; // 0x45
-	volatile uint8_t			timer0Counter; // 0x46
-	volatile uint8_t			timer0Compare; // 0x47
+	volatile uint8_t					timerGeneral; // 0x43
+	volatile Bitfield< TimerControl8 >	timer0Control; // 0x44
+	volatile uint8_t					reserved45; // 0x45
+	volatile uint8_t					timer0Counter; // 0x46
+	volatile uint8_t					timer0Compare; // 0x47
 
 	volatile uint8_t reserved48; // 0x48
 	volatile uint8_t reserved49; // 0x49
@@ -235,8 +287,8 @@ struct Register
 	volatile uint8_t general1; // 0x4A
 	volatile uint8_t general2; // 0x4B
 
-	Bitfield< SpiStatusControl >	spiStatusControl; // 0x4C
-	volatile uint8_t 				spiData; // 0x4E
+	volatile Bitfield< SpiStatusControl >	spiStatusControl; // 0x4C
+	volatile uint8_t 						spiData; // 0x4E
 
 	volatile uint8_t reserved4F; // 0x4F
 
@@ -262,8 +314,8 @@ struct Register
 	volatile uint16_t stackPointer; // 0x5D
 	volatile uint8_t status; // 0x5F
 
-	Bitfield< WatchdogControl > watchdogControl; // 0x60
-	volatile uint8_t clockPrescale; // 0x61
+	volatile Bitfield< WatchdogControl > watchdogControl; // 0x60
+	volatile uint8_t					 clockPrescale; // 0x61
 
 	volatile uint8_t reserved62; // 0x62
 	volatile uint8_t reserved63; // 0x63
@@ -282,10 +334,10 @@ struct Register
 	volatile uint8_t reserved6C; // 0x6C
 	volatile uint8_t reserved6D; // 0x6D
 
-	Bitfield< TimerInterruptMask8 >		timer0InterruptMask; // 0x6E
-	Bitfield< TimerInterruptMask16 >	timer1InterruptMask; // 0x6F
-	Bitfield< TimerInterruptMask8 >		timer2InterruptMask; // 0x70
-	Bitfield< TimerInterruptMask16 >	timer3InterruptMask; // 0x71
+	volatile Bitfield< TimerInterruptMask8 >		timer0InterruptMask; // 0x6E
+	volatile Bitfield< TimerInterruptMask16 >		timer1InterruptMask; // 0x6F
+	volatile Bitfield< TimerInterruptMask8 >		timer2InterruptMask; // 0x70
+	volatile Bitfield< TimerInterruptMask16 >		timer3InterruptMask; // 0x71
 
 	volatile uint8_t reserved72; // 0x72
 	volatile uint8_t reserved73; // 0x73
@@ -301,24 +353,24 @@ struct Register
 	volatile uint8_t	reserved7D; // 0x7D
 	volatile uint16_t	adcDigitalInputDisable; // 0x7E
 
-	BitfieldDummy< TimerControl16 >	timer1Control; // 0x80
-	volatile uint8_t 				reserved83; // 0x83
-	volatile uint16_t 				timer1Counter; // 0x84
-	volatile uint16_t				timer1InputCapture; // 0x86
-	volatile uint16_t				timer1CompareA; // 0x88
-	volatile uint16_t				timer1CompareB; // 0x8A
-	volatile uint16_t				timer1CompareC; // 0x8C
+	volatile BitfieldDummy< TimerControl16 >	timer1Control; // 0x80
+	volatile uint8_t 							reserved83; // 0x83
+	volatile uint16_t 							timer1Counter; // 0x84
+	volatile uint16_t							timer1InputCapture; // 0x86
+	volatile uint16_t							timer1CompareA; // 0x88
+	volatile uint16_t							timer1CompareB; // 0x8A
+	volatile uint16_t							timer1CompareC; // 0x8C
 
 	volatile uint8_t reserved8E; // 0x8E
 	volatile uint8_t reserved8F; // 0x8F
 
-	BitfieldDummy< TimerControl16 >	timer3Control; // 0x90
-	volatile uint8_t 				reserved93; // 0x93
-	volatile uint16_t 				timer3Counter; // 0x94
-	volatile uint16_t				timer3InputCapture; // 0x96
-	volatile uint16_t				timer3CompareA; // 0x98
-	volatile uint16_t				timer3CompareB; // 0x9A
-	volatile uint16_t				timer3CompareC; // 0x9C
+	volatile BitfieldDummy< TimerControl16 >	timer3Control; // 0x90
+	volatile uint8_t 							reserved93; // 0x93
+	volatile uint16_t 							timer3Counter; // 0x94
+	volatile uint16_t							timer3InputCapture; // 0x96
+	volatile uint16_t							timer3CompareA; // 0x98
+	volatile uint16_t							timer3CompareB; // 0x9A
+	volatile uint16_t							timer3CompareC; // 0x9C
 
 	volatile uint8_t reserved9E; // 0x9E
 	volatile uint8_t reserved9F; // 0x9F
@@ -339,14 +391,14 @@ struct Register
 	volatile uint8_t reservedAE; // 0xAE
 	volatile uint8_t reservedAF; // 0xAF
 
-	Bitfield< TimerControl8_2 > timer2Control; // 0xB0
-	volatile uint8_t 			reservedB1; // 0xB1
-	volatile uint8_t			timer2Counter; // 0xB2
-	volatile uint8_t			timer2Compare; // 0xB3
-	volatile uint8_t 			reservedB4; // 0xB4
-	volatile uint8_t 			reservedB5; // 0xB5
-	volatile uint8_t			timer2Async; // 0xB6
-	volatile uint8_t 			reservedB7; // 0xB7
+	volatile Bitfield< TimerControl8_2 > timer2Control; // 0xB0
+	volatile uint8_t 					reservedB1; // 0xB1
+	volatile uint8_t					timer2Counter; // 0xB2
+	volatile uint8_t					timer2Compare; // 0xB3
+	volatile uint8_t 					reservedB4; // 0xB4
+	volatile uint8_t 					reservedB5; // 0xB5
+	volatile uint8_t					timer2Async; // 0xB6
+	volatile uint8_t 					reservedB7; // 0xB7
 
 	volatile uint8_t twiBitRate; // 0xB8
 	volatile uint8_t twiStatus; // 0xB9
@@ -358,17 +410,15 @@ struct Register
 	volatile uint8_t reservedBE; // 0xBE
 	volatile uint8_t reservedBF; // 0xBF
 
-	BitfieldDummy< UsartControl >	usart0Control; // 0xC0
-	volatile uint8_t							reservedC3;	// 0xC3
-	Bitfield< UsartBaudRate >		usart0BaudRate; // 0xC4
-	volatile uint8_t							usart0Data; // 0xC6
+	volatile Bitfield< UsartControl >		usart0Control; // 0xC0
+	volatile Bitfield< UsartBaudRate >		usart0BaudRate; // 0xC4
+	volatile uint8_t						usart0Data; // 0xC6
 
 	volatile uint8_t	reservedC7;	// 0xC7
 
-	BitfieldDummy< UsartControl >	usart1Control; // 0xC8
-	volatile uint8_t							reservedCB;	// 0xCB
-	Bitfield< UsartBaudRate >		usart1BaudRate; // 0xCC
-	volatile uint8_t							usart1Data; // 0xCE
+	volatile Bitfield< UsartControl >		usart1Control; // 0xC8
+	volatile Bitfield< UsartBaudRate >		usart1BaudRate; // 0xCC
+	volatile uint8_t						usart1Data; // 0xCE
 
 	volatile uint8_t reservedCF; // 0xCF
 	volatile uint8_t reservedD0; // 0xD0
@@ -380,28 +430,27 @@ struct Register
 	volatile uint8_t reservedD6; // 0xD6
 	volatile uint8_t reservedD7; // 0xD7
 
-	Bitfield< CanGeneralConfig >			canGeneralConfig; // 0xD8
-	Bitfield< CanGeneralStatus >			canGeneralStatus; // 0xD9
-	Bitfield< CanGeneralInterruptFlag >		canGeneralInterruptFlag; // 0xDA
-	Bitfield< CanGeneralInterruptEnable >	canGeneralInterruptEnable; // 0xDB
-	Bitfield< CanMobEnable >				canMobEnable; // 0xDC
-	Bitfield< CanMobInterruptEnable >		canMobInterruptEnable; // 0xDE
-	Bitfield< CanMobInterruptFlag >			canMobInterruptFlag; // 0xE0
-	BitfieldDummy< CanTiming >				canTiming; // 0xE2
-	volatile uint8_t						canTimerPrescale; // 0xE5
-	volatile uint16_t						canTimerCounter; // 0xE6
-	volatile uint16_t						canTtcTimerCounter; // 0xE8
-	volatile uint8_t						canTxErrorCounter; // 0xEA
-	volatile uint8_t						canRxErrorCounter; // 0xEB
-	Bitfield< CanHighestPriorityMob >		canHighestPriorityMob; // 0xEC
-	Bitfield< CanPage >						canPage; // 0xED
+	volatile Bitfield< CanGeneralConfig >			canGeneralConfig; // 0xD8
+	volatile Bitfield< CanGeneralStatus >			canGeneralStatus; // 0xD9
+	volatile Bitfield< CanGeneralInterruptFlag >	canGeneralInterruptFlag; // 0xDA
+	volatile Bitfield< CanGeneralInterruptEnable >	canGeneralInterruptEnable; // 0xDB
+	volatile Bitfield< CanMobEnable >				canMobEnable; // 0xDC
+	volatile Bitfield< CanMobInterruptEnable >		canMobInterruptEnable; // 0xDE
+	volatile Bitfield< CanMobInterruptFlag >		canMobInterruptFlag; // 0xE0
+	volatile Bitfield< CanTiming >					canTiming; // 0xE2
+	volatile uint16_t								canTimerCounter; // 0xE6
+	volatile uint16_t								canTtcTimerCounter; // 0xE8
+	volatile uint8_t								canTxErrorCounter; // 0xEA
+	volatile uint8_t								canRxErrorCounter; // 0xEB
+	volatile Bitfield< CanHighestPriorityMob >		canHighestPriorityMob; // 0xEC
+	volatile Bitfield< CanPage >					canPage; // 0xED
 
-	Bitfield< CanMobStatus >	canMobStatus; // 0xEE
-	Bitfield< CanMobControl >	canMobControl; // 0xEF
-	Bitfield< CanMobId >		canMobId; // 0xF0
-	Bitfield< CanMobMask >		canMobMask; // 0xF4
-	volatile uint16_t			canMobTimerStamp; // 0xF8
-	volatile uint8_t			canMobData; // 0xFA
+	volatile Bitfield< CanMobStatus >				canMobStatus; // 0xEE
+	volatile Bitfield< CanMobControl >				canMobControl; // 0xEF
+	volatile Bitfield< CanMobId >					canMobId; // 0xF0
+	volatile Bitfield< CanMobMask >					canMobMask; // 0xF4
+	volatile uint16_t								canMobTimerStamp; // 0xF8
+	volatile uint8_t								canMobData; // 0xFA
 
 	volatile uint8_t reservedFB; // 0xFB
 	volatile uint8_t reservedFC; // 0xFC

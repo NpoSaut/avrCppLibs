@@ -159,16 +159,16 @@ namespace EepromStaticPrivate
 		reg.eepromData = writingVar[num];
 
 		Bitfield<EepromControl> ctr;
-		ctr.readEnable_ = false;
-		ctr.writeEnable_ = false;
-		ctr.masterWriteEnable_ = true;
-		ctr.interruptEnable_ = true;
+		ctr.readEnable = false;
+		ctr.writeEnable = false;
+		ctr.masterWriteEnable = true;
+		ctr.interruptEnable = true;
 		reg.eepromControl = ctr; // Prepare
 
-		ctr.readEnable_ = false;
-		ctr.writeEnable_ = true;
-		ctr.masterWriteEnable_ = true;
-		ctr.interruptEnable_ = true;
+		ctr.readEnable = false;
+		ctr.writeEnable = true;
+		ctr.masterWriteEnable = true;
+		ctr.interruptEnable = true;
 		reg.eepromControl = ctr; // Start!
 	}
 
