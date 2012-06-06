@@ -48,20 +48,22 @@
 
 namespace EepromStaticPrivate
 {
-	 volatile uint8_t byteNumber = 0; 	// 0 - no active write, 1...4 - active
-	 Complex<uint32_t> writingVar;		// 4 байта максимум
-	 uint8_t* startAddress;				// address of low byte
-	 SoftIntHandler afterWrite;
+	bool updateMode = false;
+	volatile uint8_t byteNumber = 0; 	// 0 - no active write, 1...4 - active
+	Complex<uint32_t> writingVar;		// 4 байта максимум
+	uint8_t* startAddress;				// address of low byte
+	SoftIntHandler afterWrite;
 
-	 void writeNextByte ();
-	 void interruptHandler ();
-	 void interruptHandler (uint16_t) { interruptHandler(); }
+	void writeNextByte ();
+	void updateNextByte ();
+	void interruptHandler ();
+	void interruptHandler (uint16_t) { interruptHandler(); }
 
-	 class Init
-	 {
-	 public:
-		 Init () { EE_READY_handler = InterruptHandler::from_function<&interruptHandler>(); }
-	 } init;
+	class Init
+	{
+	public:
+		Init () { EE_READY_handler = InterruptHandler::from_function<&interruptHandler>(); }
+	} init;
 }
 
 template<typename Type>
@@ -100,7 +102,8 @@ public:
 		return var;
 	}
 
-	bool writeUnblock( const Type& var, const SoftIntHandler& runAfterWriteEnd = SoftIntHandler() );
+	bool writeUnblock( const Type& var, const SoftIntHandler& runAfterWriteEnd = SoftIntHandler(), const bool& updateMode = false );
+	bool updateUnblock( const Type& var, const SoftIntHandler& runAfterWriteEnd = SoftIntHandler() );
 	bool ready () volatile { return EepromStaticPrivate::byteNumber == 0; }
 
 private:
@@ -116,7 +119,7 @@ Eeprom<Type>::Eeprom ()
 }
 
 template<typename Type>
-bool Eeprom<Type>::writeUnblock(const Type& var, const SoftIntHandler& runAfterWriteEnd)
+bool Eeprom<Type>::writeUnblock(const Type& var, const SoftIntHandler& runAfterWriteEnd, const bool& updateMode )
 {
 	volatile uint8_t sreg = reg.status;
 	cli ();
@@ -125,6 +128,7 @@ bool Eeprom<Type>::writeUnblock(const Type& var, const SoftIntHandler& runAfterW
 		EepromStaticPrivate::byteNumber = sizeof(Type);
 		reg.status = sreg;
 
+		EepromStaticPrivate::updateMode = updateMode;
 		EepromStaticPrivate::writingVar = (uint32_t) var;
 		EepromStaticPrivate::startAddress = (uint8_t *)this;
 		EepromStaticPrivate::afterWrite = runAfterWriteEnd;
@@ -150,15 +154,34 @@ bool Eeprom<Type>::writeUnblock(const Type& var, const SoftIntHandler& runAfterW
 	}
 }
 
+template<typename Type>
+bool Eeprom<Type>::updateUnblock(const Type& var, const SoftIntHandler& runAfterWriteEnd)
+{
+	return writeUnblock( var, runAfterWriteEnd, true );
+}
+
 namespace EepromStaticPrivate
 {
 	void writeNextByte ()
 	{
 		uint8_t num = --byteNumber;
 		reg.eepromAddress = startAddress+num;
+
+		Bitfield<EepromControl> ctr (0);
+		if (updateMode)
+		{
+			// Read before write
+			ctr.readEnable = true;
+			reg.eepromControl = ctr;
+
+			if (reg.eepromData == writingVar[num])
+			{
+				interruptHandler();
+				return;
+			}
+		}
 		reg.eepromData = writingVar[num];
 
-		Bitfield<EepromControl> ctr;
 		ctr.readEnable = false;
 		ctr.writeEnable = false;
 		ctr.masterWriteEnable = true;
@@ -170,6 +193,36 @@ namespace EepromStaticPrivate
 		ctr.masterWriteEnable = true;
 		ctr.interruptEnable = true;
 		reg.eepromControl = ctr; // Start!
+	}
+
+	void updateNextByte ()
+	{
+		uint8_t num = --byteNumber;
+		reg.eepromAddress = startAddress+num;
+
+		// Read before write
+		Bitfield<EepromControl> ctr (0);
+		ctr.readEnable = true;
+		reg.eepromControl = ctr;
+
+		if (reg.eepromData != writingVar[num])
+		{
+			reg.eepromData = writingVar[num];
+
+			ctr.readEnable = false;
+			ctr.writeEnable = false;
+			ctr.masterWriteEnable = true;
+			ctr.interruptEnable = true;
+			reg.eepromControl = ctr; // Prepare
+
+			ctr.readEnable = false;
+			ctr.writeEnable = true;
+			ctr.masterWriteEnable = true;
+			ctr.interruptEnable = true;
+			reg.eepromControl = ctr; // Start!
+		}
+		else
+			interruptHandler();
 	}
 
 	void interruptHandler ()
