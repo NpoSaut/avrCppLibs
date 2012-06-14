@@ -114,7 +114,7 @@ public:
 			if ( t.active )
 			{
 				Bitfield<Time> time( clock.getTime() );
-				if ( t.timeHighBit == time->highBit	&& t.timeLowPart < time->lowPart )
+				if ( t.timeHighBit == time->highBit	&& t.timeLowPart <= time->lowPart )
 				{
 					t.command.handler (t.command.parameter);
 					t.active = 0;
@@ -128,7 +128,7 @@ public:
 
 	volatile uint8_t fill;
 
-private:
+//private:
 	typedef typename Clock::Time ClockTime;
 	struct Task
 	{
