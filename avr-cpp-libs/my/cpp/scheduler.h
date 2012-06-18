@@ -128,7 +128,7 @@ public:
 
 	volatile uint8_t fill;
 
-//private:
+private:
 	typedef typename Clock::Time ClockTime;
 	struct Task
 	{

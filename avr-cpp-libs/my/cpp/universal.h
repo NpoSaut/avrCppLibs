@@ -121,13 +121,13 @@ Complex<uint16_t> swap (const uint16_t& a)
 // Перезагрузка
 void reboot ()
 {
-//	cli ();
-//	do
-//	{
-//		wdt_enable(WDTO_15MS);
-//		for (;;) { asm volatile ("nop"); }
-//	}
-//	while (0);
+	cli ();
+	do
+	{
+		wdt_enable(WDTO_15MS);
+		for (;;) { asm volatile ("nop"); }
+	}
+	while (0);
 }
 
 //
