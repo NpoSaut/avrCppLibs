@@ -77,52 +77,13 @@ template< class Clock, Clock& clock,
 class Scheduler
 {
 public:
-	Scheduler ()
-	{
-		static_assert (sizeof(InTime) < sizeof(typename Clock::Time), "Тип InTime должен быть меньше, чем Clock::Time");
-	}
-	bool runIn (Command command, InTime time)
-	{
-		for (Task& t : task)
-		{
-			uint8_t sreg = SREG; // Remember last state
-			cli ();
+	Scheduler ();
 
-			if (t.active != 1 && t.blocked != 1) // Empty and unblocked
-			{
-				t.blocked = 1;
-				SREG = sreg;
+	uint8_t runIn (Command command, InTime time);
 
-				t.time = clock.getTime() + time;
-				t.command = command;
-				t.active = 1;
-				t.blocked = 0;
+	bool deleteId (uint8_t id);
 
-				fill ++;
-				return true;
-			}
-			else
-				SREG = sreg;
-		}
-		return false;
-	}
-
-	void invoke ()
-	{
-		for (Task& t : task)
-		{
-			if ( t.active )
-			{
-				Bitfield<Time> time( clock.getTime() );
-				if ( t.timeHighBit == time.highBit	&& t.timeLowPart < time.lowPart )
-				{
-					t.command.handler (t.command.parameter);
-					t.active = 0;
-					fill --;
-				}
-			}
-		}
-	}
+	void invoke ();
 
 	static constexpr uint32_t discreetMks = Clock::discreetMks;
 
@@ -165,6 +126,87 @@ private:
 
 	Task task[size];
 };
+
+template< class Clock, Clock& clock,
+		  uint8_t size,
+		  typename InTime  >
+Scheduler<Clock, clock, size, InTime>::Scheduler()
+{
+	static_assert (sizeof(InTime) < sizeof(typename Clock::Time), "Тип InTime должен быть меньше, чем Clock::Time");
+}
+
+template< class Clock, Clock& clock,
+		  uint8_t size,
+		  typename InTime  >
+uint8_t Scheduler<Clock, clock, size, InTime>::runIn (Command command, InTime time)
+{
+	uint8_t num = 0;
+	for (Task& t : task)
+	{
+		num ++;
+		uint8_t sreg = SREG; // Remember last state
+		cli ();
+
+		if (t.active != 1 && t.blocked != 1) // Empty and unblocked
+		{
+			t.blocked = 1;
+			SREG = sreg;
+
+			t.time = clock.getTime() + time;
+			t.command = command;
+			t.active = 1;
+			t.blocked = 0;
+
+			fill ++;
+			return num;
+		}
+		else
+			SREG = sreg;
+	}
+	return false;
+}
+
+template< class Clock, Clock& clock,
+		  uint8_t size,
+		  typename InTime  >
+bool Scheduler<Clock, clock, size, InTime>::deleteId (uint8_t id)
+{
+	if (id--)
+	{
+		if (task[id].active)
+		{
+			task[id].active = 0;
+			return true;
+		}
+		else
+			return false;
+	}
+	else
+		return false;
+}
+
+template< class Clock, Clock& clock,
+		  uint8_t size,
+		  typename InTime  >
+void Scheduler<Clock, clock, size, InTime>::invoke ()
+{
+	for (Task& t : task)
+	{
+		if ( t.active )
+		{
+			Bitfield<Time> time( clock.getTime() );
+			if ( t.timeHighBit == time.highBit	&& t.timeLowPart <= time.lowPart )
+			{
+				t.command.handler (t.command.parameter);
+				t.active = 0;
+				fill --;
+			}
+		}
+	}
+}
+
+
+
 
 
 #endif /* SCHEDULER_H_ */

@@ -146,7 +146,7 @@ struct CanPage
 
 struct CanMobStatus
 {
-	uint8_t acknowledgmentError	:1;
+	uint8_t acknowledgmentError		:1;
 	uint8_t formError				:1;
 	uint8_t crcError				:1;
 	uint8_t stuffError				:1;
