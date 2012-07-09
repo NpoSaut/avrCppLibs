@@ -138,7 +138,7 @@ public:
 
 	bool writeUnblock( const Type& var, const SoftIntHandler& runAfterWriteEnd = SoftIntHandler(), const bool& updateMode = false );
 	bool updateUnblock( const Type& var, const SoftIntHandler& runAfterWriteEnd = SoftIntHandler() );
-	bool ready () volatile { return EepromStaticPrivate::byteNumber == 0; }
+	bool isReady () volatile const { return EepromStaticPrivate::byteNumber == 0 && !reg.eepromControl && !(reg.pgmStore & 1); }
 
 private:
 	Type var;
