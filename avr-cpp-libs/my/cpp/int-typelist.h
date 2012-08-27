@@ -61,7 +61,7 @@ using namespace ::Loki::TL;
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
 			Int2Type<I11>)
 #define INT_TYPELIST_12(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12) \
-	LOKI_TYPELIST_11 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
+	LOKI_TYPELIST_12 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
 			Int2Type<I11>, Int2Type<I12>)
 #define INT_TYPELIST_13(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13) \
