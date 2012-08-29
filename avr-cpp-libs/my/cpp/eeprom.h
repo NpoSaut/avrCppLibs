@@ -25,17 +25,17 @@
  *  ~~~ Условия, налагаемые на работу с eeprom помимо класса Eeprom: ~~~
  *  Совместно с объектами класса Eeprom в eeprom-памяти могут быть расположены традиционные переменные.
  *  Класс Eeprom полностью совместим со стандартными функциями eeprom_write_byte.
- *  Однако не совместим со сторонними реализациями неблокирующей записи.
+ *  Однако может оказаться не совместимым со сторонними реализациями неблокирующей записи.
  *
  *  ~~~ Интерфейс: ~~~
- *  Если необходимо создать переменную типа Type в eeprom, вы пишите: Type var EEMEM;
+ *  Чтобы создать переменную типа Type в eeprom раньше вы писали: Type var EEMEM;
  *  Теперь вы можете написать: Eeprom<Type> var EEMEM;
  *  после чего можно работать с переменной как обычно:
  *  var = 3;
  *  test = var;
  *
  *  Или же использовать неблокирующую запись:
- *  void wait (uint16_t pointer);
+ *  void wait (uint16_t pointer); // функция для вызова по завершению записи
  *  var.updateUnblock( 5, SoftIntHandler::from_function<&wait>() );
  *
  *
@@ -46,18 +46,34 @@
 	Eeprom<uint8_t> var EEMEM;
 	Eeprom<uint8_t> var2 EEMEM;
 
-	void waitEndOfUnblockWrite (uint16_t pointerToWrittenVariable)
+	void waitEndOfUnblockWrite (uint16_t pointerToWrittenVariable) // функция для вызова по завершению неблокирующей записи.
+																   // Аргументом передаётся указатель на записанную переменную.
 	{
-		a = *((Eeprom<uint8_t> *) pointerToWrittenVariable); // чтение записанной переменной
+		Eeprom<uint8_t>& var = *((Eeprom<uint8_t> *) pointerToWrittenVariable); // Ссылка на переменную
+		if ( var.isReady() ) // Проверяет нет ли активных операций с eeprom
+		{
+			//значит чтение можно начать незамедлительно
+			a = var; // чтение записанной переменной
+		}
+		else // eeprom занят
+		{
+			// Повторим попытку позже
+			dispatcher.add ( SoftIntHandler::from_function<&waitOfUnblockWrite>() , pointerToWrittenVariable );
+		}
 	}
 
 	int main ()
 	{
-		var = 1;
-		a = var;
-		var2 = var;
+		var = 1; // блокирующая запись.
+				 // На этом месте исполнение программы остановится на время записи (4,5 мсек на байт)
+				 // Также если не закончена другая запись, то сначала функция будет дожидаться её завершения.
+		a = var; // блокирующее чтение.
+				 // Задержка возможна только в случае занятости eeprom другой операцией (из-за неблокирующей записи в другом месте)
+		var2 = var; // блокирующие чтение и запись
 
-		if ( !var.updateUnblock( 3, SoftIntHandler::from_function<&waitEndOfUnblockWrite>() ) )
+		if ( !var.updateUnblock( 3, SoftIntHandler::from_function<&waitEndOfUnblockWrite>() ) ) // попытка неблокирующей записи.
+			// Выполнение программы продолжится сразу же, не дожидаясь окончания записи.
+			// В момент окончания в диспетчер будет поставлен делегат функции waitEndOfUnblockWrite>()
 		{
 			// Действия в случае неготовности eeprom
 		}
