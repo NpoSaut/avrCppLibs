@@ -133,6 +133,7 @@ template <typename Type, uint8_t size = sizeof(Type)> struct TypeSelect;
 	template <typename Type> struct TypeSelect<Type, 1> { typedef uint8_t Result; };
 	template <typename Type> struct TypeSelect<Type, 2> { typedef uint16_t Result; };
 	template <typename Type> struct TypeSelect<Type, 4> { typedef uint32_t Result; };
+	template <typename Type> struct TypeSelect<Type, 8> { typedef uint64_t Result; };
 
 // Для имеющиейся структуры с битовыми полями Bit
 // предосталяет доступ как к целому
