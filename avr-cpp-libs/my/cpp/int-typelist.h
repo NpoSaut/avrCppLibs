@@ -80,66 +80,66 @@ using namespace ::Loki::TL;
 		I16) \
 	LOKI_TYPELIST_16 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
 			Int2Type<I16>)
 #define INT_TYPELIST_17(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, \
 		I16, I17) \
 	LOKI_TYPELIST_17 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
 			Int2Type<I16>, Int2Type<I17>)
 #define INT_TYPELIST_18(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, \
 		I16, I17, I18) \
 	LOKI_TYPELIST_18 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
 			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>)
 #define INT_TYPELIST_19(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, \
 		I16, I17, I18, I19) \
 	LOKI_TYPELIST_19 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
 			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>)
 #define INT_TYPELIST_20(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, \
 		I16, I17, I18, I19, I20) \
 	LOKI_TYPELIST_20 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
 			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20>)
 #define INT_TYPELIST_21(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, \
 		I16, I17, I18, I19, I20, I21) \
 	LOKI_TYPELIST_21 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
-			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
+			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20>, \
 			Int2Type<I21>)
 #define INT_TYPELIST_22(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, \
 		I16, I17, I18, I19, I20, I21, I22) \
 	LOKI_TYPELIST_22 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
-			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
+			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20>, \
 			Int2Type<I21>, Int2Type<I22>)
 #define INT_TYPELIST_23(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, \
 		I16, I17, I18, I19, I20, I21, I22, I23) \
 	LOKI_TYPELIST_23 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
-			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
+			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20>, \
 			Int2Type<I21>, Int2Type<I22>, Int2Type<I23>)
 #define INT_TYPELIST_24(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, \
 		I16, I17, I18, I19, I20, I21, I22, I23, I24) \
 	LOKI_TYPELIST_24 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
-			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
+			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20>, \
 			Int2Type<I21>, Int2Type<I22>, Int2Type<I23>, Int2Type<I24>)
 #define INT_TYPELIST_25(I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11, I12, I13, I14, I15, \
 		I16, I17, I18, I19, I20, I21, I22, I23, I24, I25) \
 	LOKI_TYPELIST_25 (Int2Type<I1>, Int2Type<I2>, Int2Type<I3>, Int2Type<I4>, Int2Type<I5>, \
 			Int2Type<I6>, Int2Type<I7>, Int2Type<I8>, Int2Type<I9>, Int2Type<I10>, \
-			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15) \
-			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20) \
+			Int2Type<I11>, Int2Type<I12>, Int2Type<I13>, Int2Type<I14>, Int2Type<I15>, \
+			Int2Type<I16>, Int2Type<I17>, Int2Type<I18>, Int2Type<I19>, Int2Type<I20>, \
 			Int2Type<I21>, Int2Type<I22>, Int2Type<I23>, Int2Type<I24>, Int2Type<I25>)
 
 #endif /* INT_TYPELIST_H_ */
