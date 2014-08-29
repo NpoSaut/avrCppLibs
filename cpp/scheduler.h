@@ -86,6 +86,7 @@ public:
 	void invoke ();
 
 	static constexpr uint32_t discreetMks = Clock::discreetMks;
+	static constexpr Clock &systemClock = clock;
 
 	volatile uint8_t fill;
 
