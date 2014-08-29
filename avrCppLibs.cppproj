@@ -121,5 +121,136 @@
       </AvrGccCpp>
     </ToolchainSettings>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="cpp" />
+    <Folder Include="cpp\Chizhov\AVR" />
+    <Folder Include="cpp\delegate\Clugston" />
+    <Folder Include="cpp\delegate\Clugston\avr" />
+    <Folder Include="cpp\delegate\Clugston\orig" />
+    <Folder Include="cpp\delegate\detail" />
+    <Folder Include="cpp\delegate\my" />
+    <Folder Include="cpp\delegate\my\detail" />
+    <Folder Include="cpp\delegate\orig" />
+    <Folder Include="cpp\delegate\orig\detail" />
+    <Folder Include="cpp\io" />
+    <Folder Include="cpp\loki" />
+    <Folder Include="cpp\delegate" />
+    <Folder Include="cpp\Chizhov" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="cpp\can-dat.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\Clugston\avr\Delegate-old.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\Clugston\avr\Delegate.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\Clugston\FastDelegate.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\Clugston\orig\FastDelegate.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\delegate.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\detail\delegate_list.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\detail\delegate_template.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\my\detail\delegate_template.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\orig\detail\delegate_list.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\delegate\orig\detail\delegate_template.hpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\dispatcher.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\eeprom.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\int-typelist.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\interrupt-dynamic.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\io.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\io\can.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\io\eeprom.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\io\hole-field.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\io\spi.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\io\timers.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\io\usart.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\io\watchdog.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\loki\NullType.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\loki\Sequence.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\loki\static_check.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\loki\Typelist.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\loki\TypelistMacros.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\loki\TypeManip.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\loki\TypeTraits.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\map-static.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\prog-spi.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\scheduler.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\thread-safe.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\timers.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\universal.h">
+      <SubType>compile</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp\delegate\detail\make_delegates.pl">
+      <SubType>compile</SubType>
+    </None>
+  </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>
