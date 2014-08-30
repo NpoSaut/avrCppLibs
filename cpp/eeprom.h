@@ -27,14 +27,14 @@
  *  Класс Eeprom полностью совместим со стандартными функциями eeprom_write_byte.
  *  Однако может оказаться не совместимым со сторонними реализациями неблокирующей записи.
  *
- *  ~~~ Интерфейс: ~~~
+ *  ~~~ �?нтерфейс: ~~~
  *  Чтобы создать переменную типа Type в eeprom раньше вы писали: Type var EEMEM;
  *  Теперь вы можете написать: Eeprom<Type> var EEMEM;
  *  после чего можно работать с переменной как обычно:
  *  var = 3;
  *  test = var;
  *
- *  Или же использовать неблокирующую запись:
+ *  �?ли же использовать неблокирующую запись:
  *  void wait (uint16_t pointer); // функция для вызова по завершению записи
  *  var.updateUnblock( 5, SoftIntHandler::from_function<&wait>() );
  *
@@ -134,11 +134,11 @@ public:
 	void operator= (const Eeprom& var) volatile
 	{
 		if ( sizeof(Type) == 1 )
-			eeprom_update_byte( (uint8_t*)(this), var.var );
+			eeprom_update_byte( (uint8_t*)(this), var );
 		if ( sizeof(Type) == 2 )
-			eeprom_update_word( (uint16_t*)(this), var.var );
+			eeprom_update_word( (uint16_t*)(this), var );
 		if ( sizeof(Type) == 4 )
-			eeprom_update_dword( (uint32_t*)(this), var.var );
+			eeprom_update_dword( (uint32_t*)(this), var );
 	}
 	operator Type () volatile const
 	{
