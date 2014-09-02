@@ -39,7 +39,7 @@
  *
  *  ~~~ Пример использования: ~~~
 Clock< Alarm<Alarm1A, 1000>, uint32_t > clock;
-Scheduler<  Clock<Alarm<Alarm1A, 1000>, uint16_t>, clock,
+Scheduler<  Clock<Alarm<Alarm1A, 1000>, uint32_t>, clock,
 			16, uint16_t > scheduler;
 
 void f (uint16_t nextTime)
