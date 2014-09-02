@@ -217,10 +217,10 @@ namespace EepromStaticPrivate
 		uint8_t num = --byteNumber;
 		reg.eepromAddress = startAddress+num;
 
-		Bitfield<EepromControl> ctr (0);
 		if (updateMode)
 		{
 			// Read before write
+			Bitfield<EepromControl> ctr (0);
 			ctr.readEnable = true;
 			reg.eepromControl = ctr;
 
@@ -231,48 +231,12 @@ namespace EepromStaticPrivate
 			}
 		}
 		reg.eepromData = writingVar[num];
-
-		ctr.readEnable = false;
-		ctr.writeEnable = false;
-		ctr.masterWriteEnable = true;
-		ctr.interruptEnable = true;
-		reg.eepromControl = ctr; // Prepare
-
-		ctr.readEnable = false;
-		ctr.writeEnable = true;
-		ctr.masterWriteEnable = true;
-		ctr.interruptEnable = true;
-		reg.eepromControl = ctr; // Start!
-	}
-
-	void updateNextByte ()
-	{
-		uint8_t num = --byteNumber;
-		reg.eepromAddress = startAddress+num;
-
-		// Read before write
-		Bitfield<EepromControl> ctr (0);
-		ctr.readEnable = true;
-		reg.eepromControl = ctr;
-
-		if (reg.eepromData != writingVar[num])
-		{
-			reg.eepromData = writingVar[num];
-
-			ctr.readEnable = false;
-			ctr.writeEnable = false;
-			ctr.masterWriteEnable = true;
-			ctr.interruptEnable = true;
-			reg.eepromControl = ctr; // Prepare
-
-			ctr.readEnable = false;
-			ctr.writeEnable = true;
-			ctr.masterWriteEnable = true;
-			ctr.interruptEnable = true;
-			reg.eepromControl = ctr; // Start!
-		}
-		else
-			interruptHandler();
+	
+		asm volatile ("sbi 0x1f, 0x03\n\t"
+					  "sbi 0x1f, 0x02\n\t"
+					  "nop\n\t"
+					  "nop\n\t"
+					  "sbi 0x1f, 0x01\n\t");
 	}
 
 	void interruptHandler ()
