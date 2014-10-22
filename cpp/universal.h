@@ -14,7 +14,6 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include <avr/interrupt.h>
-#include <avr/wdt.h>
 
 #include <cpp/loki/TypeTraits.h>
 
@@ -154,18 +153,6 @@ private:
 Complex<uint16_t> swap (const uint16_t& a)
 {
 	return {Complex<uint16_t>(a)[1], Complex<uint16_t>(a)[0]};
-}
-
-// Перезагрузка
-void reboot ()
-{
-	cli ();
-	do
-	{
-		wdt_enable(WDTO_15MS);
-		for (;;) { asm volatile ("nop"); }
-	}
-	while (0);
 }
 
 //
