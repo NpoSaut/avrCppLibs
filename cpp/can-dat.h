@@ -328,7 +328,8 @@ public:
 
 	template <uint16_t descriptor>
 	SoftIntHandler& txHandler();
-
+	
+	Delegate<void ()> busOffHandler;
 
 private:
 	enum { txNumber = Length<TxDescriptorGroupList>::value };
@@ -852,7 +853,7 @@ void CanDat<TxDescriptorGroupList, RxDescriptorGroupList, RxDescriptorInterruptL
 		::interruptHandler ()
 {
 	if ( reg.canGeneralStatus.busOff )
-		reboot ();
+		busOffHandler ();
 	reg.canGeneralStatus = 0xFF; // Снимаем флаги. Интерфейся для снятия флага - запись 1.
 
 	uint8_t highestPriorityMob = reg.canHighestPriorityMob;

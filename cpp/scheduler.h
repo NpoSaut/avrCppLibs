@@ -89,6 +89,8 @@ public:
 	static constexpr Clock &systemClock = clock;
 
 	volatile uint8_t fill;
+	
+	Delegate<void ()> fullHandler;
 
 private:
 	typedef typename Clock::Time ClockTime;
@@ -164,6 +166,8 @@ uint8_t Scheduler<Clock, clock, size, InTime>::runIn (Command command, InTime ti
 		else
 			SREG = sreg;
 	}
+	
+	fullHandler ();
 	return false;
 }
 

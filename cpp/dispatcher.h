@@ -108,6 +108,8 @@ public:
 //		else
 //			asm volatile ("nop");
 	}
+	
+	Delegate<void ()> overflowHandler;
 
 private:
 	Command command[256];
@@ -117,14 +119,20 @@ private:
 	uint8_t blockNumber ()
 	{
 		uint8_t blockedNumber;
+		bool overflow = false;
 		ATOMIC
 		{
 			blockedNumber = tail;
 			if ( ++tail == head )
 			{
 				++head;
+				overflow = true;
 			}
 		}
+		
+		if (overflow)
+			overflowHandler ();
+			
 		return blockedNumber;
 	}
 };
