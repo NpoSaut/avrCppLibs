@@ -81,7 +81,7 @@ namespace srutil
 			return !(operator bool());
 		}
 
-	private:
+	public:
 		
 		// Invoke of empty delegate bring to reset AVR
 		// I add an empty function to call it when described event occurs

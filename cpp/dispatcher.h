@@ -104,17 +104,22 @@ public:
 		}
 
 		if (com.handler)
+		{
+			currentCommandPointer = (uint16_t)com.handler.object_ptr;
 			com.handler (com.parameter);
+			currentCommandPointer = 0xFFFF;
+		}
 //		else
 //			asm volatile ("nop");
 	}
 	
-	Delegate<void ()> overflowHandler;
+	Delegate<void (uint16_t)> overflowHandler;
 
 private:
 	Command command[256];
 	volatile uint8_t head;
 	volatile uint8_t tail;
+	volatile uint16_t currentCommandPointer;
 
 	uint8_t blockNumber ()
 	{
@@ -131,7 +136,7 @@ private:
 		}
 		
 		if (overflow)
-			overflowHandler ();
+			overflowHandler (currentCommandPointer);
 			
 		return blockedNumber;
 	}
