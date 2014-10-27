@@ -72,6 +72,7 @@ int main ()
 #include <cpp/timers.h>
 
 template< class Clock, Clock& clock,
+		  class Dispatcher, Dispatcher& dispatcher,
 		  uint8_t size,
 		  typename InTime = uint16_t  >
 class Scheduler
@@ -82,8 +83,6 @@ public:
 	uint8_t runIn (Command command, InTime time);
 
 	bool deleteId (uint8_t id);
-
-	void invoke ();
 
 	static constexpr uint32_t discreetMks = Clock::discreetMks;
 	static constexpr Clock &systemClock = clock;
@@ -127,21 +126,26 @@ private:
 		};
 	};
 
+	void loop (uint16_t);
+	void invoke ();
 	Task task[size];
 };
 
 template< class Clock, Clock& clock,
+		  class Dispatcher, Dispatcher& dispatcher,
 		  uint8_t size,
 		  typename InTime  >
-Scheduler<Clock, clock, size, InTime>::Scheduler()
+Scheduler<Clock, clock, Dispatcher, dispatcher, size, InTime>::Scheduler()
 {
 	static_assert (sizeof(InTime) < sizeof(typename Clock::Time), "Тип InTime должен быть меньше, чем Clock::Time");
+	loop(0);
 }
 
 template< class Clock, Clock& clock,
+		  class Dispatcher, Dispatcher& dispatcher,
 		  uint8_t size,
 		  typename InTime  >
-uint8_t Scheduler<Clock, clock, size, InTime>::runIn (Command command, InTime time)
+uint8_t Scheduler<Clock, clock, Dispatcher, dispatcher, size, InTime>::runIn (Command command, InTime time)
 {
 	uint8_t num = 0;
 	for (Task& t : task)
@@ -172,9 +176,10 @@ uint8_t Scheduler<Clock, clock, size, InTime>::runIn (Command command, InTime ti
 }
 
 template< class Clock, Clock& clock,
+		  class Dispatcher, Dispatcher& dispatcher,
 		  uint8_t size,
 		  typename InTime  >
-bool Scheduler<Clock, clock, size, InTime>::deleteId (uint8_t id)
+bool Scheduler<Clock, clock, Dispatcher, dispatcher, size, InTime>::deleteId (uint8_t id)
 {
 	if (id--)
 	{
@@ -191,9 +196,20 @@ bool Scheduler<Clock, clock, size, InTime>::deleteId (uint8_t id)
 }
 
 template< class Clock, Clock& clock,
+			class Dispatcher, Dispatcher& dispatcher,
+			uint8_t size,
+			typename InTime  >
+void Scheduler<Clock, clock, Dispatcher, dispatcher, size, InTime>::loop (uint16_t)
+{
+	invoke();
+	dispatcher.add(Command{SoftIntHandler::from_method<Scheduler, &Scheduler::loop> (this), 0});
+}
+
+template< class Clock, Clock& clock,
+		  class Dispatcher, Dispatcher& dispatcher,
 		  uint8_t size,
 		  typename InTime  >
-void Scheduler<Clock, clock, size, InTime>::invoke ()
+void Scheduler<Clock, clock, Dispatcher, dispatcher, size, InTime>::invoke ()
 {
 	for (Task& t : task)
 	{
@@ -202,7 +218,7 @@ void Scheduler<Clock, clock, size, InTime>::invoke ()
 			Bitfield<Time> time( clock.getTime() );
 			if ( t.timeHighBit == time.highBit	&& t.timeLowPart <= time.lowPart )
 			{
-				t.command.handler (t.command.parameter);
+				dispatcher.add(t.command);
 				t.active = 0;
 				fill --;
 			}
