@@ -80,8 +80,6 @@ namespace srutil
 		{
 			return !(operator bool());
 		}
-
-	public:
 		
 		// Invoke of empty delegate bring to reset AVR
 		// I add an empty function to call it when described event occurs
@@ -92,6 +90,8 @@ namespace srutil
 
 		void* object_ptr;
 		stub_type stub_ptr;
+		
+	private:
 
 		static SRUTIL_DELEGATE_CLASS_NAME from_stub(void* object_ptr, stub_type stub_ptr)
 		{

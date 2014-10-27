@@ -105,7 +105,7 @@ public:
 
 		if (com.handler)
 		{
-			currentCommandPointer = (uint16_t)com.handler.object_ptr;
+			currentCommandPointer = (uint16_t)com.handler.stub_ptr;
 			com.handler (com.parameter);
 			currentCommandPointer = 0xFFFF;
 		}
