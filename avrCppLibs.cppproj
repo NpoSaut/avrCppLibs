@@ -237,6 +237,9 @@
     <Compile Include="cpp\scheduler.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="cpp\smartdog.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="cpp\thread-safe.h">
       <SubType>compile</SubType>
     </Compile>
