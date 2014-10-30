@@ -329,7 +329,8 @@ public:
 	template <uint16_t descriptor>
 	SoftIntHandler& txHandler();
 	
-	Delegate<void ()> busOffHandler;
+	void setBusOffHandler (Delegate<void ()> handler) { busOffHandler = handler; }
+	Delegate<void ()> getBusOffHandler () const { return busOffHandler; }
 
 private:
 	enum { txNumber = Length<TxDescriptorGroupList>::value };
@@ -642,6 +643,8 @@ private:
 			enum { value = 0 };
 		};
 	// <- конеы: Является ли класс Typelist'ом с хотябы 2 элементами
+	
+	Delegate<void ()> busOffHandler;
 };
 
 template <	class TxDescriptorGroupList, class RxDescriptorGroupList,

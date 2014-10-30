@@ -138,6 +138,9 @@
     <Folder Include="cpp\Chizhov" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="cpp\can-async.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="cpp\can-dat.h">
       <SubType>compile</SubType>
     </Compile>
@@ -175,6 +178,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="cpp\eeprom.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cpp\heap.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="cpp\int-typelist.h">
