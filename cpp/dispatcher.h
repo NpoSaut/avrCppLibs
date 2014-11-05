@@ -113,6 +113,8 @@ public:
 //			asm volatile ("nop");
 	}
 	
+	uint16_t getCurrentCommandPointer () const { return currentCommandPointer; }
+	
 	Delegate<void (uint16_t)> overflowHandler;
 
 private:
