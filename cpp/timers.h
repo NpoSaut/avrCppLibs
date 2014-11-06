@@ -282,7 +282,7 @@ private:
 				break;
 		}
 	}
-	uint16_t getPrescale (const ClockType& clockType) const
+	uint16_t getPrescale (ClockType clockType) const
 	{
 		switch (clockType)
 		{
