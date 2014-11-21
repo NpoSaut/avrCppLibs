@@ -223,7 +223,9 @@ template <	volatile Bitfield<SpiStatusControl> Register::* control, volatile uin
 template <	MemType type	>
 Complex<uint16_t> ProgSpiSimple<control, dataReg, port, ssPin, sckPin, mosiPin, misoPin, resetPort, resetPin>::readWord ()
 {
-	return Complex<uint16_t>{ read<type>(), read<type>() };
+	uint8_t a = read<type>();
+	uint8_t b = read<type>();
+	return Complex<uint16_t>{ a, b };
 }
 
 template <	volatile Bitfield<SpiStatusControl> Register::* control, volatile uint8_t Register::* dataReg,
